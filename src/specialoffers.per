@@ -1,0 +1,27 @@
+LAYOUT (TEXT = "Special Offers")
+  VBOX
+    TABLE
+    {
+     ID     Description                        Disc%     Type             Category        Start        End          Min    Max
+    [c1    |c2                                |c3       |c4              |c5             |c6          |c7          |c8    |c9   ]
+    }
+    END
+  END
+END
+
+ATTRIBUTES
+  EDIT c1 = FORMONLY.specialofferid TYPE INTEGER,       NOENTRY;
+  EDIT c2 = FORMONLY.description     TYPE VARCHAR,       REQUIRED;
+  EDIT c3 = FORMONLY.discountpct     TYPE DECIMAL(10,4), REQUIRED;
+  EDIT c4 = FORMONLY.offertype       TYPE VARCHAR,       REQUIRED;
+  EDIT c5 = FORMONLY.category        TYPE VARCHAR,       REQUIRED;
+  DATEEDIT c6 = FORMONLY.startdate   TYPE DATE,          REQUIRED;
+  DATEEDIT c7 = FORMONLY.enddate     TYPE DATE,          REQUIRED;
+  EDIT c8 = FORMONLY.minqty          TYPE INTEGER,       REQUIRED;
+  EDIT c9 = FORMONLY.maxqty          TYPE INTEGER;
+END
+
+INSTRUCTIONS
+  SCREEN RECORD sr_offer(specialofferid, description, discountpct, offertype,
+                         category, startdate, enddate, minqty, maxqty);
+END

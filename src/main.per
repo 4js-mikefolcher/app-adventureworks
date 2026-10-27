@@ -1,0 +1,36 @@
+TOPMENU
+  GROUP file (TEXT = "File")
+    COMMAND quit (TEXT = "Quit", IMAGE = "fa-power-off")
+  END
+  GROUP go (TEXT = "Sales")
+    COMMAND orders        (TEXT = "Sales Orders")
+    COMMAND customers     (TEXT = "Customers")
+    COMMAND salespersons  (TEXT = "Sales Persons")
+    COMMAND territories   (TEXT = "Territories")
+    COMMAND offers        (TEXT = "Special Offers")
+  END
+END
+
+LAYOUT (TEXT = "AdventureWorks Sales")
+  VBOX
+    GROUP (TEXT = "Sales Management")
+      GRID
+      {
+        [b_orders                    ]
+        [b_customers                 ]
+        [b_salespersons              ]
+        [b_territories               ]
+        [b_offers                    ]
+      }
+      END
+    END
+  END
+END
+
+ATTRIBUTES
+  BUTTON b_orders:       orders,       TEXT = "Sales Orders",   IMAGE = "fa-shopping-cart";
+  BUTTON b_customers:    customers,    TEXT = "Customers",      IMAGE = "fa-users";
+  BUTTON b_salespersons: salespersons, TEXT = "Sales Persons",  IMAGE = "fa-id-badge";
+  BUTTON b_territories:  territories,  TEXT = "Territories",    IMAGE = "fa-globe";
+  BUTTON b_offers:       offers,       TEXT = "Special Offers", IMAGE = "fa-tags";
+END

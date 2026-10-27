@@ -1,0 +1,23 @@
+LAYOUT (TEXT = "Sales Territories")
+  VBOX
+    TABLE
+    {
+     ID     Name                      Country  Group              Sales YTD          Last Year
+    [c1    |c2                       |c3      |c4                |c5                |c6               ]
+    }
+    END
+  END
+END
+
+ATTRIBUTES
+  EDIT c1 = FORMONLY.territoryid       TYPE INTEGER,       NOENTRY;
+  EDIT c2 = FORMONLY.name              TYPE VARCHAR,       REQUIRED;
+  EDIT c3 = FORMONLY.countryregioncode TYPE VARCHAR,       REQUIRED, UPSHIFT;
+  EDIT c4 = FORMONLY.groupname         TYPE VARCHAR,       REQUIRED;
+  EDIT c5 = FORMONLY.salesytd          TYPE DECIMAL(20,4), NOENTRY;
+  EDIT c6 = FORMONLY.saleslastyear     TYPE DECIMAL(20,4), NOENTRY;
+END
+
+INSTRUCTIONS
+  SCREEN RECORD sr_terr(territoryid, name, countryregioncode, groupname, salesytd, saleslastyear);
+END

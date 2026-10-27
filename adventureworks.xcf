@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  GAS application configuration for the AdventureWorks Sales app (GBC / web).
+
+  This is the only runnable program in the project: src/main.4gl is the single
+  module with a MAIN block (the domain modules - territories, customers,
+  salespersons, specialoffers, salesorders - are libraries invoked via their
+  *_run() functions).
+
+  Deployment:
+    * Keep this file at the project root. $(application.path) resolves to the
+      directory holding this .xcf, so the paths below are portable.
+    * Register the project root as a GAS application directory, or copy this
+      file into your GAS $(res.appdata.path)/app directory.
+    * Build first: `make build` (produces bin/main.42m and the .42f forms).
+    * The database "adventureworks" must already exist and be populated.
+-->
+<APPLICATION Parent="defaultgwc"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:noNamespaceSchemaLocation="http://www.4js.com/ns/gas/4.0/cfextwa.xsd">
+  <RESOURCE Id="application.path" Source="INTERNAL">/Users/mikefolcher/4js-github/app-adventureworks</RESOURCE>
+  <EXECUTION>
+    <PATH>$(application.path)/bin</PATH>
+    <DVM>fglrun</DVM>
+    <MODULE>main</MODULE>
+    <ENVIRONMENT_VARIABLE Id="FGLDBPATH">$(application.path)</ENVIRONMENT_VARIABLE>
+    <ENVIRONMENT_VARIABLE Id="FGLLDPATH">$(application.path)/bin</ENVIRONMENT_VARIABLE>
+    <ENVIRONMENT_VARIABLE Id="FGLRESOURCEPATH">$(application.path)/bin:$(application.path)/res</ENVIRONMENT_VARIABLE>
+    <ENVIRONMENT_VARIABLE Id="FGLPROFILE">$(application.path)/res/fglprofile.pgs</ENVIRONMENT_VARIABLE>
+  </EXECUTION>
+</APPLICATION>

@@ -1,0 +1,4 @@
+dbi.database.adventureworks.source = "adventureworks@localhost"
+dbi.database.adventureworks.driver = "dbmpgs_9"
+dbi.database.adventureworks.username = "adventureworks"
+dbi.database.adventureworks.password = "CHANGE_ME"
