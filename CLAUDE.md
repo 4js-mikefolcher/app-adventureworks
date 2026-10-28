@@ -94,21 +94,46 @@ FGLGUI=0 TERM=xterm fglrun program.42m  # Run in terminal mode
 This is **AdventureWorks Sales** — a front-end app over the Sales domain of the
 AdventureWorks PostgreSQL database. See `README.md` for the full overview.
 
+### Coding Standards
+All new and modified Genero code follows the team standards in
+`docs/CodingStandards.md`, imported here so they load every session:
+
+@docs/CodingStandards.md
+
+- The standards take precedence over the style of the surrounding code. Rules 1-10
+  are fully applied to this repo: 3-space indent, camelCase names without
+  underscores, Title Case file and module names, `VAR` locals, typed signatures,
+  named `TYPE`s and `IMPORT FGL` only (no linking). Rules 11-12 (MVC separation and
+  no cross-referencing) are **not yet applied**: the domain modules still mix
+  model and controller code and import `LibAw`/`AwCalc`/`AwRepo`. Do not restructure
+  them without the user's go-ahead. When asked, ask first about navigation from one
+  feature to another; the rest is settled in rules 11 and 12: helpers
+  (`<Role>Helper.4gl`), lookups (`<Feature>Lookup.4gl`), the entry point
+  (`MainController.4gl`, `MainMenuController.4gl`), and each `SELECT` living with the
+  module it supports (UI reads in the controller, validation and write-guard reads in
+  the model).
+- Locals use `VAR` under the standards, so the "`DEFINE` must be at top of
+  FUNCTION/MAIN" note in the upstream block above only governs legacy `DEFINE`.
+
 ### Environment
 - Database name: `adventureworks` (connect via `res/fglprofile.pgs`, driver `dbmpgs_9`).
 - Schema file: `adventureworks.sch` in the project root — 68 lowercase tables.
   Set `FGLDBPATH` to the project root so `SCHEMA adventureworks` resolves when
   compiling modules and forms (the Makefiles do this).
 - Build with `make build`; run with `make run` (GDC) — see README for GBC/GAS.
+- Every compiler warning fails the build: `fglcomp -Wall -Werror` for modules and tests,
+  `fglform -W all` (output-checked) for forms. Fix the code; do not relax `WARNFLAGS`.
 - This app does **not** build or load the database (that is `fgl-adventureworks`).
 
 ### Architecture
-- Modular per-domain: one `.4gl` + `.per` per entity, a shared `lib_aw.4gl`,
-  and `main.4gl` for navigation. Each domain module exposes one `*_run()` entry.
-- Reuse `lib_aw`: `aw_connect()`, `aw_disconnect()`, `aw_sql_error()`,
-  `aw_confirm()`, `aw_fill_combobox()`, `aw_customer_label()`, `aw_salesperson_label()`.
-- Testable logic lives in two PUBLIC leaf libraries: `aw_calc.4gl` (pure
-  derived-value math/labels) and `aw_repo.4gl` (read-only data-access). Domain
+- Modular per-domain: one `.4gl` + `.per` per entity (`Customers`, `SalesOrders`,
+  `SalesPersons`, `Territories`, `SpecialOffers`), a shared `LibAw.4gl`, and
+  `Main.4gl` for navigation. Each domain module exposes one `*Run()` entry
+  (`customersRun()`, `salesOrdersRun()`, ...), called module-qualified from `Main`.
+- Reuse `LibAw`: `awConnect()`, `awDisconnect()`, `awSqlError()`, `awConfirm()`,
+  `awFillComboBox()`, `awCustomerLabel()`, `awSalesPersonLabel()`.
+- Testable logic lives in two PUBLIC leaf libraries: `AwCalc.4gl` (pure
+  derived-value math/labels) and `AwRepo.4gl` (read-only data-access). Domain
   modules call into these rather than reimplementing logic inline. Put new pure
   or data-access logic here (not in PRIVATE dialog functions) so it stays testable.
 
@@ -120,10 +145,10 @@ AdventureWorks PostgreSQL database. See `README.md` for the full overview.
   test, then `EXIT PROGRAM FglUnit.run()`. Tests are PUBLIC, parameterless.
 - fglunit can only call PUBLIC functions of an imported module — PRIVATE
   functions are untestable from outside (another reason to extract logic into
-  `aw_calc`/`aw_repo`).
+  `AwCalc`/`AwRepo`).
 - Resolve the fglunit package on the path with `eval "$(fglpkg env)"`, then
   prepend `bin/` (the app's compiled libraries) to `FGLLDPATH`.
-- DB-backed suites connect in `setUpSuite` with TRY/CATCH and `skip()` every
+- DB-backed suites connect in `setupSuite` with TRY/CATCH and `skip()` every
   test when the DB is down, so they never error in a DB-less CI.
 
 ### Hard-won project gotchas (verified against this toolchain, Genero 6.00)
@@ -135,10 +160,17 @@ AdventureWorks PostgreSQL database. See `README.md` for the full overview.
 - `CANCEL DELETE` is only valid in `INPUT ARRAY` `BEFORE DELETE`; in a
   `DISPLAY ARRAY` use a custom action and manage the array with `deleteElement()`.
 - Reserved-word columns `salesterritory."group"` and `specialoffer."type"` must be
-  double-quoted in SQL and mapped to safe record members (`groupname`, `offertype`).
+  double-quoted in SQL and mapped to safe record members (`groupName`, `offerType`).
 - AdventureWorks computed columns were **dropped** in the PG port
   (`salesorderdetail.linetotal`, `salesorderheader.salesordernumber`/`totaldue`,
   `customer.accountnumber`) — compute them in 4GL, never SELECT them.
 - `salesorderdetail` has a composite FK on `(specialofferid, productid)` into
   `specialofferproduct`: only sellable products may be ordered, and the offer must
-  be valid for the product (resolved in `so_resolve_offer()`).
+  be valid for the product (resolved in `AwRepo.repoResolveOffer()`).
+- Dialogs and `ui.ComboBox.forName()` address a form item by its **field name**
+  (`FORMONLY.x` / `table.column`), never its layout tag: a tag gives `-8015` /
+  `-1102` or a silently empty combobox.
+- Static SQL qualifies every column with its table (`customer.customerid`):
+  identifiers are case-insensitive, so an unqualified `status` or `productid` is
+  compiled as a host variable when a variable of that name exists. Check with
+  `fglcomp -S`.
