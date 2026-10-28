@@ -86,15 +86,16 @@ PRIVATE FUNCTION browseTerritories() RETURNS ()
          END IF
 
       ON APPEND
+         # When int_flag is TRUE after this block (the input was cancelled, or the save
+         # failed), the dialog removes the new row itself, so the program must not delete
+         # it as well: that dropped an unrelated row from the list.
          CALL defaultTerritory(rec)
          IF inputTerritory(scr_line(), rec) THEN
             IF saveTerritory(TRUE, rec) THEN
                LET territoryList[arr_curr()] = rec
             ELSE
-               CALL territoryList.deleteElement(arr_curr())
+               LET int_flag = TRUE
             END IF
-         ELSE
-            CALL territoryList.deleteElement(arr_curr())
          END IF
 
       ON ACTION remove ATTRIBUTES(TEXT = "Delete", IMAGE = "fa-trash")

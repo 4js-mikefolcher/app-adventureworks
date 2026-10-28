@@ -95,15 +95,16 @@ PRIVATE FUNCTION browseOffers() RETURNS ()
          END IF
 
       ON APPEND
+         # When int_flag is TRUE after this block (the input was cancelled, or the save
+         # failed), the dialog removes the new row itself, so the program must not delete
+         # it as well: that dropped an unrelated row from the list.
          CALL defaultOffer(rec)
          IF inputOffer(scr_line(), rec) THEN
             IF saveOffer(TRUE, rec) THEN
                LET offerList[arr_curr()] = rec
             ELSE
-               CALL offerList.deleteElement(arr_curr())
+               LET int_flag = TRUE
             END IF
-         ELSE
-            CALL offerList.deleteElement(arr_curr())
          END IF
 
       ON ACTION remove ATTRIBUTES(TEXT = "Delete", IMAGE = "fa-trash")

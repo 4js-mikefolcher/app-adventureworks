@@ -193,6 +193,10 @@ All new and modified Genero code follows the team standards in
 - `TOPMENU` / `TOOLBAR` are **top-level** `.per` sections, not inside `LAYOUT`.
 - `CANCEL DELETE` is only valid in `INPUT ARRAY` `BEFORE DELETE`; in a
   `DISPLAY ARRAY` use a custom action and manage the array with `deleteElement()`.
+- In a `DISPLAY ARRAY` `ON APPEND`, the dialog removes the new row itself when `int_flag` is
+  TRUE (or `status` is not zero) after the block. To reject the row, leave `int_flag` TRUE
+  (a cancelled `INPUT` already does; set it after a failed save) and do **not** call
+  `deleteElement(arr_curr())` as well: that removed a second, unrelated row from the list.
 - Reserved-word columns `salesterritory."group"` and `specialoffer."type"` must be
   double-quoted in dynamic SQL, which only works with `ifxemul.dblquotes = false` in
   the profile (see Environment). A `RECORD LIKE salesterritory.*` names the member
