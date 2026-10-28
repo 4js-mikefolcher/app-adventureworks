@@ -3,30 +3,40 @@
   GAS application configuration for the AdventureWorks Sales app (GBC / web).
 
   This is the only runnable program in the project: src/Main.4gl is the single
-  module with a MAIN block (the domain modules - Territories, Customers,
-  SalesPersons, SpecialOffers, SalesOrders - are libraries invoked via their
-  *Run() functions).
+  module with a MAIN block. The feature modules (the controllers and the modules
+  not yet split into model and controller) are libraries invoked through their
+  *Run() entry functions.
+
+  MACHINE-SPECIFIC: the project location is written once, in the RESOURCE below.
+  To move the project, change res.adventureworks.path and nothing else.
+
+  Do not use the predefined resource application.path for that. GAS derives it
+  from EXECUTION/PATH, so setting PATH from it is a circular reference. It
+  resolves to /bin, the DVM starts in /bin/bin, and the request fails after the
+  10 second DVM timeout, while the application still registers and GBC still
+  loads. That is why the id below is a custom one.
 
   Deployment:
-    * Keep this file at the project root. $(application.path) resolves to the
-      directory holding this .xcf, so the paths below are portable.
-    * Register the project root as a GAS application directory, or copy this
-      file into your GAS $(res.appdata.path)/app directory.
-    * Build first: `make build` (produces bin/Main.42m and the .42f forms).
+    * Build first: `make build` (produces bin/Main.42m and the .42f forms). PATH,
+      FGLLDPATH and FGLRESOURCEPATH all point at bin/, which does not exist until
+      then.
+    * GAS reads this file from its application directory, $(res.appdata.path)/app.
+      Copy it there after every edit; a symlink in that directory is ignored.
+    * res/fglprofile.pgs must exist (copy res/fglprofile.pgs.example and set the
+      password) and keep its ifxemul.dblquotes line.
     * The database "adventureworks" must already exist and be populated.
 -->
 <APPLICATION Parent="defaultgwc"
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              xsi:noNamespaceSchemaLocation="http://www.4js.com/ns/gas/4.0/cfextwa.xsd">
-  <RESOURCE Id="application.path" Source="INTERNAL">/Users/mikefolcher/4js-github/app-adventureworks</RESOURCE>
+  <RESOURCE Id="res.adventureworks.path" Source="INTERNAL">/Users/mikefolcher/4js-github/app-adventureworks</RESOURCE>
   <EXECUTION>
-    <ENVIRONMENT_VARIABLE Id="FGLDBPATH">$(application.path)</ENVIRONMENT_VARIABLE>
-    <ENVIRONMENT_VARIABLE Id="FGLLDPATH">$(application.path)/bin</ENVIRONMENT_VARIABLE>
-    <ENVIRONMENT_VARIABLE Id="FGLRESOURCEPATH">$(application.path)/bin:$(application.path)/res</ENVIRONMENT_VARIABLE>
-    <ENVIRONMENT_VARIABLE Id="FGLPROFILE">$(application.path)/res/fglprofile.pgs</ENVIRONMENT_VARIABLE>
-    <PATH>$(application.path)/bin</PATH>
+    <ENVIRONMENT_VARIABLE Id="FGLDBPATH">$(res.adventureworks.path)</ENVIRONMENT_VARIABLE>
+    <ENVIRONMENT_VARIABLE Id="FGLLDPATH">$(res.adventureworks.path)/bin</ENVIRONMENT_VARIABLE>
+    <ENVIRONMENT_VARIABLE Id="FGLRESOURCEPATH">$(res.adventureworks.path)/bin:$(res.adventureworks.path)/res</ENVIRONMENT_VARIABLE>
+    <ENVIRONMENT_VARIABLE Id="FGLPROFILE">$(res.adventureworks.path)/res/fglprofile.pgs</ENVIRONMENT_VARIABLE>
+    <PATH>$(res.adventureworks.path)/bin</PATH>
     <DVM>fglrun</DVM>
     <MODULE>Main</MODULE>
-
   </EXECUTION>
 </APPLICATION>

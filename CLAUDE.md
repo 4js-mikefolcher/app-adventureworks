@@ -191,6 +191,11 @@ All new and modified Genero code follows the team standards in
 - `salesorderdetail` has a composite FK on `(specialofferid, productid)` into
   `specialofferproduct`: only sellable products may be ordered, and the offer must
   be valid for the product (resolved in `AwRepo.repoResolveOffer()`).
+- In `adventureworks.xcf`, never build paths from the predefined `application.path`
+  resource: GAS derives it from `EXECUTION/PATH`, so `<PATH>$(application.path)/bin` is
+  circular and resolves to `/bin` (DVM starts in `/bin/bin`, request times out after 10 s,
+  GBC still loads). The file uses the custom resource `res.adventureworks.path`. GAS reads
+  its own **copy** in `appdata/app` (symlinks are ignored): recopy after every edit.
 - Dialogs and `ui.ComboBox.forName()` address a form item by its **field name**
   (`FORMONLY.x` / `table.column`), never its layout tag: a tag gives `-8015` /
   `-1102` or a silently empty combobox.

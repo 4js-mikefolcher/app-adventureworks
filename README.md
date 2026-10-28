@@ -107,9 +107,21 @@ fglrun bin/TestData.42m --filter ResolveOffer --junit out.xml
 ```
 
 ### Running under GBC
-GBC rendering requires the Genero Application Server (GAS). Point a GAS
-application configuration at `bin/Main.42m` (with `FGLDBPATH`/`FGLRESOURCEPATH`
-as in the Makefile), or launch the app through Genero Studio's embedded GAS.
+GBC rendering requires the Genero Application Server (GAS). `adventureworks.xcf` at the
+project root is the application configuration. It sets `FGLDBPATH`, `FGLLDPATH`,
+`FGLRESOURCEPATH`, `FGLPROFILE` and the DVM's working directory from one resource,
+`res.adventureworks.path`, which holds this project's absolute path: change that one value
+when the project moves. Then:
+
+1. `make build`, and make sure `res/fglprofile.pgs` exists (see above).
+2. Copy `adventureworks.xcf` into the GAS application directory (`appdata/app`; a symlink
+   there is ignored), again after every edit.
+3. Open `https://<host>/<gas-prefix>/ua/r/adventureworks`.
+
+Do not build the paths from the predefined `application.path` resource: GAS derives it from
+`EXECUTION/PATH`, so it resolves to `/bin`, the DVM starts in `/bin/bin`, and the request times
+out after 10 seconds while the page itself still loads.
+
 `make run` / GDC is the quickest path for local functional testing.
 
 ## Conventions
