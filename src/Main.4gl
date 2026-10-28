@@ -8,7 +8,7 @@
 ################################################################################
 
 IMPORT FGL LibAw
-IMPORT FGL SalesOrders
+IMPORT FGL SalesOrdersController
 IMPORT FGL CustomersController
 IMPORT FGL SalesPersonsController
 IMPORT FGL TerritoriesController
@@ -27,7 +27,7 @@ MAIN
 
    MENU "Sales"
       ON ACTION orders
-         CALL SalesOrders.salesOrdersRun()
+         CALL SalesOrdersController.salesOrdersRun()
       ON ACTION customers
          CALL CustomersController.customersRun()
       ON ACTION salespersons

@@ -105,11 +105,10 @@ All new and modified Genero code follows the team standards in
   underscores, Title Case file and module names, `VAR` locals, typed signatures,
   named `TYPE`s and `IMPORT FGL` only (no linking). Rules 11-13 (MVC separation,
   no cross-referencing, JSON bridge) are being applied **one feature at a time**.
-  Migrated: `Territories`, `SpecialOffers`, `SalesPersons` and `Customers` (each a
-  `<Feature>Model`, `<Feature>Controller` and `<Feature>.per`).
-  Not yet: `SalesOrders` still mixes
-  model and controller code and import `LibAw`/`AwCalc`/`AwRepo`. Migrate the next
-  feature only when the user asks. When asked, ask first about navigation from one
+  Migrated: all five features, `Territories`, `SpecialOffers`, `SalesPersons`, `Customers`
+  and `SalesOrders` (each a `<Feature>Model`, `<Feature>Controller` and `<Feature>.per`).
+  Not yet: the entry point, `Main.4gl`, which still imports `LibAw` and the controllers
+  directly (to become `MainController` and `MainMenuController`). When asked, ask first about navigation from one
   feature to another; the rest is settled in rules 11 and 12: helpers
   (`<Role>Helper.4gl`), lookups (`<Feature>Lookup.4gl`), the entry point
   (`MainController.4gl`, `MainMenuController.4gl`), and each `SELECT` living with the
@@ -133,10 +132,10 @@ All new and modified Genero code follows the team standards in
 - This app does **not** build or load the database (that is `fgl-adventureworks`).
 
 ### Architecture
-- Modular per-domain: one `.4gl` + `.per` per entity not yet migrated (`SalesOrders`), a shared
-  `LibAw.4gl`, and `Main.4gl` for
-  navigation. Each domain module exposes one `*Run()` entry (`customersRun()`,
-  `salesOrdersRun()`, ...), called module-qualified from `Main`.
+- Modular per feature (`Territories`, `SpecialOffers`, `SalesPersons`, `Customers`,
+  `SalesOrders`), plus `Main.4gl` for navigation and `LibAw.4gl` (only the connection,
+  until `Main` is migrated). Each controller exposes one `*Run()` entry
+  (`customersRun()`, `salesOrdersRun()`, ...), called module-qualified from `Main`.
 - Migrated features follow MVC: `Territories` is `TerritoriesModel.4gl` (database
   record, insert/update/delete with their transactions, returns `(BOOLEAN, STRING)`),
   `TerritoriesController.4gl` (view record, `toDbTerritory`, dialogs, the list SELECT,
@@ -156,12 +155,17 @@ All new and modified Genero code follows the team standards in
   `ui.ComboBox.forName(<field name>)`; lazy cursor, leaf, controllers only).
 - A model reads the SQL error **before** `ROLLBACK WORK` (the rollback resets it); the
   controller shows the returned text with `ERROR`.
-- Reuse `LibAw`: `awConnect()`, `awDisconnect()`, `awSqlError()`, `awConfirm()`,
-  `awFillComboBox()`, `awCustomerLabel()`, `awSalesPersonLabel()`.
-- Testable logic lives in two PUBLIC leaf libraries: `AwCalc.4gl` (pure
-  derived-value math/labels) and `AwRepo.4gl` (read-only data-access). Domain
-  modules call into these rather than reimplementing logic inline. Put new pure
-  or data-access logic here (not in PRIVATE dialog functions) so it stays testable.
+- `SalesOrders` is the largest feature: `SalesOrdersModel.4gl` holds the two database records
+  (`salesorderheader.*`, `salesorderdetail.*`), the derived values (`lineTotal`, `orderTotal`,
+  `statusLabel`, `orderNumber`), `validateOrderLines`, the reads that serve a write
+  (`resolveOffer`, `customerExists`, the address and ship-method defaults inside `createOrder`)
+  and `saveOrder` (header update plus delete-all/insert-all lines in one transaction).
+  `SalesOrdersController.4gl` serves two views (`SalesOrdersList.per`, `SalesOrders.per`),
+  resolves the customer name by join (no per-row query), reads the list-price default itself,
+  and fills the comboboxes from `SalesPersonsLookup`, `TerritoriesLookup`, `ProductsLookup`
+  and `SpecialOffersLookup` (plus the model-labelled status list).
+- Testable logic is the models' PUBLIC functions and the controllers' PUBLIC conversion
+  functions. Put new pure or write-serving logic in the model, not in PRIVATE dialog functions.
 
 ### Testing (fglunit)
 - Suites are in `tests/`; run with `make test` (writes `bin/junit-*.xml`).
@@ -170,10 +174,10 @@ All new and modified Genero code follows the team standards in
   `CALL FglUnit.suite(...)`, one `FglUnit.register("name", FUNCTION name)` per
   test, then `EXIT PROGRAM FglUnit.run()`. Tests are PUBLIC, parameterless.
 - fglunit can only call PUBLIC functions of an imported module — PRIVATE
-  functions are untestable from outside (another reason to extract logic into
-  `AwCalc`/`AwRepo`).
-- Every conversion function has a suite (rule 13): `TestTerritories` and `TestSpecialOffers` populate every
-  member that crosses the JSON bridge and asserts none came back NULL.
+  functions are untestable from outside (another reason to keep logic in the models).
+- Every conversion function has a suite (rule 13): each `Test<Feature>` populates every
+  member that crosses the JSON bridge and asserts none came back NULL (not-NULL first, then
+  the value: `assertTrue(NULL)` does not fail).
 - Resolve the fglunit package on the path with `eval "$(fglpkg env)"`, then
   prepend `bin/` (the app's compiled libraries) to `FGLLDPATH`.
 - DB-backed suites connect in `setupSuite` with TRY/CATCH and `skip()` every
@@ -197,7 +201,11 @@ All new and modified Genero code follows the team standards in
   `customer.accountnumber`) — compute them in 4GL, never SELECT them.
 - `salesorderdetail` has a composite FK on `(specialofferid, productid)` into
   `specialofferproduct`: only sellable products may be ordered, and the offer must
-  be valid for the product (resolved in `AwRepo.repoResolveOffer()`).
+  be valid for the product (resolved in `SalesOrdersModel.resolveOffer()`).
+- `fglcomp` 6.00.01 segfaults on a function that returns a `DYNAMIC ARRAY OF` the model's record
+  type (hit in `SalesOrdersController`; small standalone cases compile, so it could not be
+  reduced further). Pass the array in and fill it instead (dynamic arrays go by reference):
+  `toDbOrderLines(viewList, orderId, dbList)`.
 - A `TABLE` shows as many rows as its layout has data lines: one line means a page of
   one row (the runtime reports `pageSize="1"`), however many records are loaded. The list
   forms repeat the data line (Territories 12, SalesPersons 20, SpecialOffers 20, Customers 15,

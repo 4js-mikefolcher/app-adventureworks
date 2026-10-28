@@ -52,16 +52,18 @@ src/
   CustomersModel.4gl           \  MVC feature: territory update + delete in the model,
   CustomersController.4gl       |  QBE search + list SELECT + territory lookup in the controller
   Customers.per                /
-  SalesOrders.4gl + SalesOrders.per + SalesOrdersList.per   master-detail centerpiece
-  AwCalc.4gl              pure derived-value logic (line/order totals, status label, order no.)
-  AwRepo.4gl              read-only data-access helpers (offer resolution, list price, existence)
+  SalesOrdersModel.4gl         \  MVC feature, the centerpiece (master-detail): derived values,
+  SalesOrdersController.4gl     |  validation, offer resolution and header+lines saves in the model;
+  SalesOrders.per               |  dialogs, list/header/line SELECTs and conversions in the controller
+  SalesOrdersList.per          /   (the second view: search and result list)
+  SalesPersonsLookup.4gl, ProductsLookup.4gl, SpecialOffersLookup.4gl   lookups (controllers only)
 tests/
-  TestAwCalc.4gl          fglunit suite for AwCalc (pure, no DB)
   TestTerritories.4gl     fglunit suite for the Territories view-to-database conversion (no DB)
   TestSpecialOffers.4gl   fglunit suite for the SpecialOffers conversion and validation (no DB)
   TestSalesPersons.4gl    fglunit suite for the SalesPersons conversion and validation (no DB)
   TestCustomers.4gl       fglunit suite for the Customers conversion (no DB)
-  TestData.4gl            fglunit suite for AwRepo + LibAw (live DB; skips if unavailable)
+  TestSalesOrders.4gl     fglunit suite for the SalesOrders derived values, validation and conversions (no DB)
+  TestSalesOrdersData.4gl fglunit suite for the SalesOrders reads that serve a write (live DB; skips if unavailable)
 ```
 
 All compiled artifacts are written to `bin/` (via `fglcomp -o` / `fglform -o`).
@@ -87,15 +89,13 @@ driver sends them as string literals, so they read as the column's name and fail
 ## Tests
 
 Unit tests use **fglunit** (xUnit for Genero BDL; installed via `fglpkg install fglunit`).
-Testable logic was extracted into two PUBLIC library modules so it can be exercised
-directly: `AwCalc` (pure) and `AwRepo` (data-access).
+Each feature's logic is testable because the model and the controller's conversion
+functions are PUBLIC: the derived values, validation and conversions need no database.
 
 ```bash
 make test     # compile + run all suites; writes bin/junit-*.xml
 ```
 
-- **TestAwCalc** — 11 pure tests (line/order totals incl. NULL handling, status
-  labels, order-number format). No database.
 - **TestTerritories** — 3 tests of the JSON-bridge conversion from the view record to
   the database record (every crossing member populated and asserted not NULL). No database.
 - **TestSpecialOffers** — 14 tests: the same conversion check, including the DATE to
@@ -104,17 +104,22 @@ make test     # compile + run all suites; writes bin/junit-*.xml
   quota kept) plus the non-negative validation. No database.
 - **TestCustomers** — 3 tests of the conversion (every crossing member populated, NULL
   territory kept, other columns NULL). No database.
-- **TestData** — 12 tests over `AwRepo` and `LibAw` name resolution against the
-  live database (name formats, fallbacks, the `(specialofferid, productid)` FK
-  resolution, product price, existence). Connects once in `setupSuite`; if the DB
-  is unreachable every test **skips** (the suite stays green), so it's CI-safe.
+- **TestSalesOrders** — 26 tests: the derived values (line/order totals incl. NULL handling,
+  status labels, order-number format), the line validation, and the header and line
+  conversions (status mapping, the DATE to DATETIME special case, NULL salesperson kept,
+  line order kept). No database.
+- **TestSalesOrdersData** — 7 tests of the reads that serve a write, against the live
+  database: the `(specialofferid, productid)` FK resolution, customer existence, and the
+  refusal of a new order for a missing customer. Nothing is written. Connects once in
+  `setupSuite`; if the DB is unreachable every test **skips** (the suite stays green), so
+  it's CI-safe.
 
 Each suite is a standalone program — run one directly with the documented flags:
 
 ```bash
 eval "$(fglpkg env)" && export FGLLDPATH="$PWD/bin:$FGLLDPATH"
-fglrun bin/TestAwCalc.42m -v
-fglrun bin/TestData.42m --filter ResolveOffer --junit out.xml
+fglrun bin/TestSalesOrders.42m -v
+fglrun bin/TestSalesOrdersData.42m --filter ResolveOffer --junit out.xml
 ```
 
 ### Running under GBC
@@ -145,8 +150,8 @@ out after 10 seconds while the page itself still loads.
   short `BEGIN/COMMIT WORK` transactions with `TRY/CATCH` error handling.
 - Reserved-word columns (`salesterritory."group"`, `specialoffer."type"`) are
   mapped to safe record members and quoted in SQL.
-- Foreign-key/constraint violations surface as friendly messages via
-  `LibAw.awSqlError()`.
+- Foreign-key/constraint violations surface as friendly messages: the model reads the SQL
+  error before rolling back and returns it, and the controller shows it.
 
 ## Notes & limitations
 

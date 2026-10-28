@@ -64,14 +64,12 @@ run-tui: build
 # tests gracefully if the database is not reachable. `make` stops on the first
 # suite that reports a failure or error.
 test: build
-	$(TESTENV) && $(FGLCOMP) -M $(WARNFLAGS) -o $(BIN) tests/TestAwCalc.4gl
-	$(TESTENV) && $(FGLCOMP) -M $(WARNFLAGS) -o $(BIN) tests/TestData.4gl
 	$(TESTENV) && $(FGLCOMP) -M $(WARNFLAGS) -o $(BIN) tests/TestTerritories.4gl
 	$(TESTENV) && $(FGLCOMP) -M $(WARNFLAGS) -o $(BIN) tests/TestSpecialOffers.4gl
 	$(TESTENV) && $(FGLCOMP) -M $(WARNFLAGS) -o $(BIN) tests/TestSalesPersons.4gl
 	$(TESTENV) && $(FGLCOMP) -M $(WARNFLAGS) -o $(BIN) tests/TestCustomers.4gl
-	@echo "== TestAwCalc =="
-	$(TESTENV) && $(FGLRUN) $(BIN)/TestAwCalc.42m --junit $(BIN)/junit-AwCalc.xml
+	$(TESTENV) && $(FGLCOMP) -M $(WARNFLAGS) -o $(BIN) tests/TestSalesOrders.4gl
+	$(TESTENV) && $(FGLCOMP) -M $(WARNFLAGS) -o $(BIN) tests/TestSalesOrdersData.4gl
 	@echo "== TestTerritories =="
 	$(TESTENV) && $(FGLRUN) $(BIN)/TestTerritories.42m --junit $(BIN)/junit-Territories.xml
 	@echo "== TestSpecialOffers =="
@@ -80,8 +78,10 @@ test: build
 	$(TESTENV) && $(FGLRUN) $(BIN)/TestSalesPersons.42m --junit $(BIN)/junit-SalesPersons.xml
 	@echo "== TestCustomers =="
 	$(TESTENV) && $(FGLRUN) $(BIN)/TestCustomers.42m --junit $(BIN)/junit-Customers.xml
-	@echo "== TestData =="
-	$(TESTENV) && FGLPROFILE=$(PROFILE) $(FGLRUN) $(BIN)/TestData.42m --junit $(BIN)/junit-Data.xml
+	@echo "== TestSalesOrders =="
+	$(TESTENV) && $(FGLRUN) $(BIN)/TestSalesOrders.42m --junit $(BIN)/junit-SalesOrders.xml
+	@echo "== TestSalesOrdersData =="
+	$(TESTENV) && FGLPROFILE=$(PROFILE) $(FGLRUN) $(BIN)/TestSalesOrdersData.42m --junit $(BIN)/junit-SalesOrdersData.xml
 
 clean:
 	$(RM) -r $(BIN)
