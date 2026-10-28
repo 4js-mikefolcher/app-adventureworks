@@ -39,7 +39,8 @@ src/
   DialogHelper.4gl        helper: yes/no confirmation dialog (controllers only)
   SqlHelper.4gl           helper: SQL error text (no UI, models may use it)
   TerritoriesLookup.4gl   lookup: fills territory comboboxes (controllers only)
-  Main.4gl / Main.per     entry point + navigation menu
+  MainController.4gl      entry point: startup only (database connection, title), then the menu
+  MainMenuController.4gl  the application menu: launches each feature controller (view: MainMenu.per)
   TerritoriesModel.4gl       \  MVC feature: database record + writes,
   TerritoriesController.4gl   |  dialogs + list SELECT + conversion,
   Territories.per            /   and the form

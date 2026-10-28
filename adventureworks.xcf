@@ -2,10 +2,10 @@
 <!--
   GAS application configuration for the AdventureWorks Sales app (GBC / web).
 
-  This is the only runnable program in the project: src/Main.4gl is the single
-  module with a MAIN block. The feature modules (the controllers and the modules
-  not yet split into model and controller) are libraries invoked through their
-  *Run() entry functions.
+  This is the only runnable program in the project: src/MainController.4gl is the
+  single module with a MAIN block. It does startup only and hands over to
+  MainMenuController, which launches the feature controllers through their *Run()
+  entry functions.
 
   MACHINE-SPECIFIC: the project location is written once, in the RESOURCE below.
   To move the project, change res.adventureworks.path and nothing else.
@@ -17,7 +17,7 @@
   loads. That is why the id below is a custom one.
 
   Deployment:
-    * Build first: `make build` (produces bin/Main.42m and the .42f forms). PATH,
+    * Build first: `make build` (produces bin/MainController.42m and the .42f forms). PATH,
       FGLLDPATH and FGLRESOURCEPATH all point at bin/, which does not exist until
       then.
     * GAS reads this file from its application directory, $(res.appdata.path)/app.
@@ -37,6 +37,6 @@
     <ENVIRONMENT_VARIABLE Id="FGLPROFILE">$(res.adventureworks.path)/res/fglprofile.pgs</ENVIRONMENT_VARIABLE>
     <PATH>$(res.adventureworks.path)/bin</PATH>
     <DVM>fglrun</DVM>
-    <MODULE>Main</MODULE>
+    <MODULE>MainController</MODULE>
   </EXECUTION>
 </APPLICATION>

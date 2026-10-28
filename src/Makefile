@@ -2,11 +2,12 @@
 # src/Makefile - compile the AdventureWorks Sales app modules and forms into the
 # bin/ output directory (BINDIR, passed in by the top-level Makefile).
 #
-# The leaf libraries, helpers and lookups (LibAw, DialogHelper, SqlHelper and the
-# *Lookup modules) are compiled FIRST: the domain modules import them
+# The leaf helpers and lookups (DialogHelper, SqlHelper and the *Lookup modules) are
+# compiled FIRST: the domain modules import them
 # and fglcomp must find the .42m (via FGLLDPATH, set by the parent Makefile) to
-# resolve each import. A model is compiled before its controller. Main is compiled
-# last (it imports every feature).
+# resolve each import. A model is compiled before its controller, then the menu
+# (MainMenuController, which imports every feature controller), and the entry point
+# (MainController) last.
 # There is no link step: modules are resolved through IMPORT FGL alone.
 # FGLDBPATH must point at the directory holding adventureworks.sch so the SCHEMA
 # references resolve.
@@ -26,14 +27,15 @@ export FGLDBPATH FGLLDPATH
 
 # Order matters: libraries first, domain modules next, main last.
 # LIBS are leaf libraries (no inter-dependencies) that the domain modules import.
-LIBS    = LibAw.4gl DialogHelper.4gl SqlHelper.4gl \
+LIBS    = DialogHelper.4gl SqlHelper.4gl \
           TerritoriesLookup.4gl SalesPersonsLookup.4gl ProductsLookup.4gl SpecialOffersLookup.4gl
 MODULES = TerritoriesModel.4gl TerritoriesController.4gl \
           SpecialOffersModel.4gl SpecialOffersController.4gl \
           SalesPersonsModel.4gl SalesPersonsController.4gl \
           CustomersModel.4gl CustomersController.4gl \
-          SalesOrdersModel.4gl SalesOrdersController.4gl
-MAINMOD = Main.4gl
+          SalesOrdersModel.4gl SalesOrdersController.4gl \
+          MainMenuController.4gl
+MAINMOD = MainController.4gl
 
 SRC     = $(LIBS) $(MODULES) $(MAINMOD)
 FORMS   = $(wildcard *.per)
@@ -62,6 +64,10 @@ $(BINDIR)/SpecialOffersController.42m: $(BINDIR)/SpecialOffersModel.42m
 $(BINDIR)/SalesPersonsController.42m: $(BINDIR)/SalesPersonsModel.42m
 $(BINDIR)/CustomersController.42m: $(BINDIR)/CustomersModel.42m
 $(BINDIR)/SalesOrdersController.42m: $(BINDIR)/SalesOrdersModel.42m
+# The menu imports every feature controller, and the entry point imports the menu.
+$(BINDIR)/MainMenuController.42m: $(BINDIR)/CustomersController.42m $(BINDIR)/SalesOrdersController.42m \
+   $(BINDIR)/SalesPersonsController.42m $(BINDIR)/SpecialOffersController.42m $(BINDIR)/TerritoriesController.42m
+$(BINDIR)/MainController.42m: $(BINDIR)/MainMenuController.42m
 
 # Forms: -W all, and any output at all (a warning or an error) fails the build.
 $(BINDIR)/%.42f: %.per | $(BINDIR)

@@ -105,10 +105,10 @@ All new and modified Genero code follows the team standards in
   underscores, Title Case file and module names, `VAR` locals, typed signatures,
   named `TYPE`s and `IMPORT FGL` only (no linking). Rules 11-13 (MVC separation,
   no cross-referencing, JSON bridge) are being applied **one feature at a time**.
-  Migrated: all five features, `Territories`, `SpecialOffers`, `SalesPersons`, `Customers`
-  and `SalesOrders` (each a `<Feature>Model`, `<Feature>Controller` and `<Feature>.per`).
-  Not yet: the entry point, `Main.4gl`, which still imports `LibAw` and the controllers
-  directly (to become `MainController` and `MainMenuController`). When asked, ask first about navigation from one
+  Applied everywhere: all five features, `Territories`, `SpecialOffers`, `SalesPersons`,
+  `Customers` and `SalesOrders` (each a `<Feature>Model`, `<Feature>Controller` and
+  `<Feature>.per`), and the entry point (`MainController`, `MainMenuController`,
+  `MainMenu.per`). `LibAw`, `AwCalc` and `AwRepo` no longer exist. When asked, ask first about navigation from one
   feature to another; the rest is settled in rules 11 and 12: helpers
   (`<Role>Helper.4gl`), lookups (`<Feature>Lookup.4gl`), the entry point
   (`MainController.4gl`, `MainMenuController.4gl`), and each `SELECT` living with the
@@ -133,9 +133,11 @@ All new and modified Genero code follows the team standards in
 
 ### Architecture
 - Modular per feature (`Territories`, `SpecialOffers`, `SalesPersons`, `Customers`,
-  `SalesOrders`), plus `Main.4gl` for navigation and `LibAw.4gl` (only the connection,
-  until `Main` is migrated). Each controller exposes one `*Run()` entry
-  (`customersRun()`, `salesOrdersRun()`, ...), called module-qualified from `Main`.
+  `SalesOrders`). The program entry is `MainController.4gl` (the only `MAIN`; startup only:
+  it connects to the database once and keeps the connection, sets the title, then calls
+  `MainMenuController.mainMenuRun()`). `MainMenuController.4gl` (view `MainMenu.per`) is the
+  one module that imports the feature controllers, to call their `*Run()` entries
+  (`customersRun()`, `salesOrdersRun()`, ...), module-qualified.
 - Migrated features follow MVC: `Territories` is `TerritoriesModel.4gl` (database
   record, insert/update/delete with their transactions, returns `(BOOLEAN, STRING)`),
   `TerritoriesController.4gl` (view record, `toDbTerritory`, dialogs, the list SELECT,

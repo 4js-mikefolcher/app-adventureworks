@@ -51,12 +51,12 @@ build:
 
 # Desktop (GDC) run. The same compiled program also serves GBC via GAS.
 run: build
-	FGLPROFILE=$(PROFILE) $(FGLRUN) $(BIN)/Main.42m
+	FGLPROFILE=$(PROFILE) $(FGLRUN) $(BIN)/MainController.42m
 
 # Headless terminal-mode run - useful to confirm DB connect + startup without a
 # front-end. Still requires the live database.
 run-tui: build
-	FGLGUI=0 TERM=xterm FGLPROFILE=$(PROFILE) $(FGLRUN) $(BIN)/Main.42m
+	FGLGUI=0 TERM=xterm FGLPROFILE=$(PROFILE) $(FGLRUN) $(BIN)/MainController.42m
 
 # Unit tests. Compiles the suites against the app's compiled libraries in bin/
 # and the installed fglunit package, then runs each suite (writing JUnit XML).
