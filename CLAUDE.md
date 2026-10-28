@@ -105,9 +105,9 @@ All new and modified Genero code follows the team standards in
   underscores, Title Case file and module names, `VAR` locals, typed signatures,
   named `TYPE`s and `IMPORT FGL` only (no linking). Rules 11-13 (MVC separation,
   no cross-referencing, JSON bridge) are being applied **one feature at a time**.
-  Migrated: `Territories`, `SpecialOffers` and `SalesPersons` (each a `<Feature>Model`,
-  `<Feature>Controller` and `<Feature>.per`).
-  Not yet: `Customers` and `SalesOrders` still mix
+  Migrated: `Territories`, `SpecialOffers`, `SalesPersons` and `Customers` (each a
+  `<Feature>Model`, `<Feature>Controller` and `<Feature>.per`).
+  Not yet: `SalesOrders` still mixes
   model and controller code and import `LibAw`/`AwCalc`/`AwRepo`. Migrate the next
   feature only when the user asks. When asked, ask first about navigation from one
   feature to another; the rest is settled in rules 11 and 12: helpers
@@ -133,7 +133,7 @@ All new and modified Genero code follows the team standards in
 - This app does **not** build or load the database (that is `fgl-adventureworks`).
 
 ### Architecture
-- Modular per-domain: one `.4gl` + `.per` per entity not yet migrated (`Customers`, `SalesOrders`), a shared
+- Modular per-domain: one `.4gl` + `.per` per entity not yet migrated (`SalesOrders`), a shared
   `LibAw.4gl`, and `Main.4gl` for
   navigation. Each domain module exposes one `*Run()` entry (`customersRun()`,
   `salesOrdersRun()`, ...), called module-qualified from `Main`.
@@ -148,7 +148,9 @@ All new and modified Genero code follows the team standards in
   picks the field), and a conversion special case (the view holds DATEs, the columns are
   DATETIMEs, so `toDbOffer` assigns the dates after the bridge). `SalesPersons` has no
   insert (a salesperson is an existing employee) and shows a controller SELECT that joins
-  `person` for the display name (not a lookup).
+  `person` for the display name (not a lookup). `Customers` is a CONSTRUCT search (so its
+  list SELECT stays dynamic) with one editable attribute, the territory; both its territory
+  comboboxes (search filter `customer.territoryid`, row editor `rTerr`) use `TerritoriesLookup`.
 - Lookups (rule 12): `TerritoriesLookup.4gl` fills the territory comboboxes
   (`fillTerritories(comboBox ui.ComboBox)`; the controller passes
   `ui.ComboBox.forName(<field name>)`; lazy cursor, leaf, controllers only).

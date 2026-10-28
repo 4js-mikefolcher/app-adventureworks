@@ -30,7 +30,8 @@ LIBS    = LibAw.4gl AwCalc.4gl AwRepo.4gl DialogHelper.4gl SqlHelper.4gl Territo
 MODULES = TerritoriesModel.4gl TerritoriesController.4gl \
           SpecialOffersModel.4gl SpecialOffersController.4gl \
           SalesPersonsModel.4gl SalesPersonsController.4gl \
-          Customers.4gl SalesOrders.4gl
+          CustomersModel.4gl CustomersController.4gl \
+          SalesOrders.4gl
 MAINMOD = Main.4gl
 
 SRC     = $(LIBS) $(MODULES) $(MAINMOD)
@@ -58,6 +59,7 @@ $(filter-out $(LIB42),$(M42)): $(BINDIR)/%.42m: %.4gl $(LIB42) | $(BINDIR)
 $(BINDIR)/TerritoriesController.42m: $(BINDIR)/TerritoriesModel.42m
 $(BINDIR)/SpecialOffersController.42m: $(BINDIR)/SpecialOffersModel.42m
 $(BINDIR)/SalesPersonsController.42m: $(BINDIR)/SalesPersonsModel.42m
+$(BINDIR)/CustomersController.42m: $(BINDIR)/CustomersModel.42m
 
 # Forms: -W all, and any output at all (a warning or an error) fails the build.
 $(BINDIR)/%.42f: %.per | $(BINDIR)

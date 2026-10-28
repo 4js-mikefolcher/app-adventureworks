@@ -49,7 +49,9 @@ src/
   SalesPersonsModel.4gl        \  MVC feature: update/delete + validation in the model,
   SalesPersonsController.4gl    |  list SELECT + territory lookup in the controller
   SalesPersons.per             /
-  Customers.4gl/.per       one module + form per domain (not yet split into model and controller)
+  CustomersModel.4gl           \  MVC feature: territory update + delete in the model,
+  CustomersController.4gl       |  QBE search + list SELECT + territory lookup in the controller
+  Customers.per                /
   SalesOrders.4gl + SalesOrders.per + SalesOrdersList.per   master-detail centerpiece
   AwCalc.4gl              pure derived-value logic (line/order totals, status label, order no.)
   AwRepo.4gl              read-only data-access helpers (offer resolution, list price, existence)
@@ -58,6 +60,7 @@ tests/
   TestTerritories.4gl     fglunit suite for the Territories view-to-database conversion (no DB)
   TestSpecialOffers.4gl   fglunit suite for the SpecialOffers conversion and validation (no DB)
   TestSalesPersons.4gl    fglunit suite for the SalesPersons conversion and validation (no DB)
+  TestCustomers.4gl       fglunit suite for the Customers conversion (no DB)
   TestData.4gl            fglunit suite for AwRepo + LibAw (live DB; skips if unavailable)
 ```
 
@@ -99,6 +102,8 @@ make test     # compile + run all suites; writes bin/junit-*.xml
   DATETIME special case, plus the date-range and quantity-range validation. No database.
 - **TestSalesPersons** — 9 tests: the conversion check (every crossing member populated, NULL
   quota kept) plus the non-negative validation. No database.
+- **TestCustomers** — 3 tests of the conversion (every crossing member populated, NULL
+  territory kept, other columns NULL). No database.
 - **TestData** — 12 tests over `AwRepo` and `LibAw` name resolution against the
   live database (name formats, fallbacks, the `(specialofferid, productid)` FK
   resolution, product price, existence). Connects once in `setupSuite`; if the DB

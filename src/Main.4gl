@@ -9,7 +9,7 @@
 
 IMPORT FGL LibAw
 IMPORT FGL SalesOrders
-IMPORT FGL Customers
+IMPORT FGL CustomersController
 IMPORT FGL SalesPersonsController
 IMPORT FGL TerritoriesController
 IMPORT FGL SpecialOffersController
@@ -29,7 +29,7 @@ MAIN
       ON ACTION orders
          CALL SalesOrders.salesOrdersRun()
       ON ACTION customers
-         CALL Customers.customersRun()
+         CALL CustomersController.customersRun()
       ON ACTION salespersons
          CALL SalesPersonsController.salesPersonsRun()
       ON ACTION territories
