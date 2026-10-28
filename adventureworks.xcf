@@ -20,12 +20,13 @@
              xsi:noNamespaceSchemaLocation="http://www.4js.com/ns/gas/4.0/cfextwa.xsd">
   <RESOURCE Id="application.path" Source="INTERNAL">/Users/mikefolcher/4js-github/app-adventureworks</RESOURCE>
   <EXECUTION>
-    <PATH>$(application.path)/bin</PATH>
-    <DVM>fglrun</DVM>
-    <MODULE>main</MODULE>
     <ENVIRONMENT_VARIABLE Id="FGLDBPATH">$(application.path)</ENVIRONMENT_VARIABLE>
     <ENVIRONMENT_VARIABLE Id="FGLLDPATH">$(application.path)/bin</ENVIRONMENT_VARIABLE>
     <ENVIRONMENT_VARIABLE Id="FGLRESOURCEPATH">$(application.path)/bin:$(application.path)/res</ENVIRONMENT_VARIABLE>
     <ENVIRONMENT_VARIABLE Id="FGLPROFILE">$(application.path)/res/fglprofile.pgs</ENVIRONMENT_VARIABLE>
+    <PATH>$(application.path)/bin</PATH>
+    <DVM>fglrun</DVM>
+    <MODULE>main</MODULE>
+
   </EXECUTION>
 </APPLICATION>
