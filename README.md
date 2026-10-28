@@ -42,15 +42,18 @@ src/
   TerritoriesModel.4gl       \  MVC feature: database record + writes,
   TerritoriesController.4gl   |  dialogs + list SELECT + conversion,
   Territories.per            /   and the form
-  SpecialOffers.4gl/.per   |  one module + form per domain
-  Customers.4gl/.per       |  (modular per-domain architecture)
-  SalesPersons.4gl/.per    |
+  SpecialOffersModel.4gl       \  MVC feature, same shape as Territories plus the
+  SpecialOffersController.4gl   |  validation in the model
+  SpecialOffers.per            /
+  Customers.4gl/.per       \  one module + form per domain
+  SalesPersons.4gl/.per    /  (not yet split into model and controller)
   SalesOrders.4gl + SalesOrders.per + SalesOrdersList.per   master-detail centerpiece
   AwCalc.4gl              pure derived-value logic (line/order totals, status label, order no.)
   AwRepo.4gl              read-only data-access helpers (offer resolution, list price, existence)
 tests/
   TestAwCalc.4gl          fglunit suite for AwCalc (pure, no DB)
   TestTerritories.4gl     fglunit suite for the Territories view-to-database conversion (no DB)
+  TestSpecialOffers.4gl   fglunit suite for the SpecialOffers conversion and validation (no DB)
   TestData.4gl            fglunit suite for AwRepo + LibAw (live DB; skips if unavailable)
 ```
 
@@ -84,10 +87,12 @@ directly: `AwCalc` (pure) and `AwRepo` (data-access).
 make test     # compile + run all suites; writes bin/junit-*.xml
 ```
 
-- **TestAwCalc** — 16 pure tests (line/order totals incl. NULL handling, status
-  labels, order-number format, date-range validation). No database.
+- **TestAwCalc** — 11 pure tests (line/order totals incl. NULL handling, status
+  labels, order-number format). No database.
 - **TestTerritories** — 3 tests of the JSON-bridge conversion from the view record to
   the database record (every crossing member populated and asserted not NULL). No database.
+- **TestSpecialOffers** — 14 tests: the same conversion check, including the DATE to
+  DATETIME special case, plus the date-range and quantity-range validation. No database.
 - **TestData** — 12 tests over `AwRepo` and `LibAw` name resolution against the
   live database (name formats, fallbacks, the `(specialofferid, productid)` FK
   resolution, product price, existence). Connects once in `setupSuite`; if the DB

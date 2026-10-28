@@ -52,7 +52,7 @@ Team coding standards for Genero BDL code in this repository. Claude Code loads 
 - **JSON bridge: decimals travel as binary64,** exact to about 15 significant digits. Verified: `1234567890123456.7891` came back as `1234567890123456.8`. Assign a decimal that can be wider than that directly after the bridge.
 - **JSON bridge: verified lossless** for all 24 columns of a real `salesorderheader` row (INTEGER, BOOLEAN, CHAR(36), DATETIME with fraction, floating DECIMAL), for quotes, backslashes, newlines, tabs and CJK text, and for DATETIME with fractional seconds. An empty string becomes NULL (the BDL rule). 10,000 conversions take about 0.04 seconds.
 - **JSON bridge: special cases are expected.** Handle them in the conversion function after the bridge call: type bridging (DATE and DATETIME), wide decimals, computed or audit columns (`modifieddate`), defaults for columns the view lacks, and any merge onto a loaded row.
-- **Test every conversion function** with a record whose every crossing member is populated, and assert that none came back NULL, because the failure is silent. Verified: removing the DATE special case from the worked example makes such a test fail.
+- **Test every conversion function** with a record whose every crossing member is populated, and assert that none came back NULL, because the failure is silent. Verified: removing the DATE special case from the worked example makes such a test fail. Assert each member is not NULL before comparing its value: a comparison with NULL is NULL, and `assertTrue(NULL)` does not fail (verified: a test that only compared the converted dates still passed with the DATE special case removed).
 
 ## Worked example (four files; compiles clean with `fglcomp -M -Wall` and `fglform -M`)
 

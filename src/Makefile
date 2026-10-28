@@ -27,7 +27,8 @@ export FGLDBPATH FGLLDPATH
 # LIBS are leaf libraries (no inter-dependencies) that the domain modules import.
 LIBS    = LibAw.4gl AwCalc.4gl AwRepo.4gl DialogHelper.4gl SqlHelper.4gl
 MODULES = TerritoriesModel.4gl TerritoriesController.4gl \
-          SpecialOffers.4gl Customers.4gl SalesPersons.4gl SalesOrders.4gl
+          SpecialOffersModel.4gl SpecialOffersController.4gl \
+          Customers.4gl SalesPersons.4gl SalesOrders.4gl
 MAINMOD = Main.4gl
 
 SRC     = $(LIBS) $(MODULES) $(MAINMOD)
@@ -53,6 +54,7 @@ $(filter-out $(LIB42),$(M42)): $(BINDIR)/%.42m: %.4gl $(LIB42) | $(BINDIR)
 
 # A controller imports its model, so the model is compiled first.
 $(BINDIR)/TerritoriesController.42m: $(BINDIR)/TerritoriesModel.42m
+$(BINDIR)/SpecialOffersController.42m: $(BINDIR)/SpecialOffersModel.42m
 
 # Forms: -W all, and any output at all (a warning or an error) fails the build.
 $(BINDIR)/%.42f: %.per | $(BINDIR)

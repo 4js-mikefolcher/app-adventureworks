@@ -12,7 +12,7 @@ IMPORT FGL SalesOrders
 IMPORT FGL Customers
 IMPORT FGL SalesPersons
 IMPORT FGL TerritoriesController
-IMPORT FGL SpecialOffers
+IMPORT FGL SpecialOffersController
 
 MAIN
    DEFER INTERRUPT
@@ -35,7 +35,7 @@ MAIN
       ON ACTION territories
          CALL TerritoriesController.territoriesRun()
       ON ACTION offers
-         CALL SpecialOffers.specialOffersRun()
+         CALL SpecialOffersController.specialOffersRun()
       ON ACTION quit
          EXIT MENU
       ON ACTION close

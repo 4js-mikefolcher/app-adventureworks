@@ -105,8 +105,9 @@ All new and modified Genero code follows the team standards in
   underscores, Title Case file and module names, `VAR` locals, typed signatures,
   named `TYPE`s and `IMPORT FGL` only (no linking). Rules 11-13 (MVC separation,
   no cross-referencing, JSON bridge) are being applied **one feature at a time**.
-  Migrated: `Territories` (`TerritoriesModel`, `TerritoriesController`, `Territories.per`).
-  Not yet: `Customers`, `SalesPersons`, `SpecialOffers` and `SalesOrders` still mix
+  Migrated: `Territories` and `SpecialOffers` (each a `<Feature>Model`,
+  `<Feature>Controller` and `<Feature>.per`).
+  Not yet: `Customers`, `SalesPersons` and `SalesOrders` still mix
   model and controller code and import `LibAw`/`AwCalc`/`AwRepo`. Migrate the next
   feature only when the user asks. When asked, ask first about navigation from one
   feature to another; the rest is settled in rules 11 and 12: helpers
@@ -133,7 +134,7 @@ All new and modified Genero code follows the team standards in
 
 ### Architecture
 - Modular per-domain: one `.4gl` + `.per` per entity (`Customers`, `SalesOrders`,
-  `SalesPersons`, `SpecialOffers`), a shared `LibAw.4gl`, and `Main.4gl` for
+  `SalesPersons`), a shared `LibAw.4gl`, and `Main.4gl` for
   navigation. Each domain module exposes one `*Run()` entry (`customersRun()`,
   `salesOrdersRun()`, ...), called module-qualified from `Main`.
 - Migrated features follow MVC: `Territories` is `TerritoriesModel.4gl` (database
@@ -142,6 +143,10 @@ All new and modified Genero code follows the team standards in
   `territoriesRun()`) and `Territories.per`. Its shared pieces are the leaf helpers
   `DialogHelper.4gl` (`confirm`, UI, controllers only) and `SqlHelper.4gl`
   (`errorText`, no UI, models may import it). `LibAw` shrinks as features migrate.
+  `SpecialOffers` has the same shape and adds two things: validation in the model
+  (`validateOfferDates`, `validateOfferQuantities`; the controller shows the message and
+  picks the field), and a conversion special case (the view holds DATEs, the columns are
+  DATETIMEs, so `toDbOffer` assigns the dates after the bridge).
 - A model reads the SQL error **before** `ROLLBACK WORK` (the rollback resets it); the
   controller shows the returned text with `ERROR`.
 - Reuse `LibAw`: `awConnect()`, `awDisconnect()`, `awSqlError()`, `awConfirm()`,
@@ -160,7 +165,7 @@ All new and modified Genero code follows the team standards in
 - fglunit can only call PUBLIC functions of an imported module — PRIVATE
   functions are untestable from outside (another reason to extract logic into
   `AwCalc`/`AwRepo`).
-- Every conversion function has a suite (rule 13): `TestTerritories` populates every
+- Every conversion function has a suite (rule 13): `TestTerritories` and `TestSpecialOffers` populate every
   member that crosses the JSON bridge and asserts none came back NULL.
 - Resolve the fglunit package on the path with `eval "$(fglpkg env)"`, then
   prepend `bin/` (the app's compiled libraries) to `FGLLDPATH`.

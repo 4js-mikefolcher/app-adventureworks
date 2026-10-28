@@ -87,18 +87,3 @@ PUBLIC FUNCTION awOrderNumber(orderId INTEGER) RETURNS STRING
    END IF
    RETURN "SO" || orderId
 END FUNCTION
-
-#-------------------------------------------------------------------------------
-#+ TRUE when a [start, end] date range is valid: an open end (NULL) is allowed,
-#+ otherwise the end must be on or after the start. A NULL start with a non-NULL
-#+ end is invalid.
-#-------------------------------------------------------------------------------
-PUBLIC FUNCTION awValidDateRange(startDate DATE, endDate DATE) RETURNS BOOLEAN
-   IF endDate IS NULL THEN
-      RETURN TRUE
-   END IF
-   IF startDate IS NULL THEN
-      RETURN FALSE
-   END IF
-   RETURN (endDate >= startDate)
-END FUNCTION

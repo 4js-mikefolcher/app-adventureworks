@@ -32,12 +32,6 @@ MAIN
    CALL FglUnit.register("testOrderNumber",          FUNCTION testOrderNumber)
    CALL FglUnit.register("testOrderNumberNull",      FUNCTION testOrderNumberNull)
 
-   CALL FglUnit.register("testDateRangeAfter",       FUNCTION testDateRangeAfter)
-   CALL FglUnit.register("testDateRangeEqual",       FUNCTION testDateRangeEqual)
-   CALL FglUnit.register("testDateRangeBefore",      FUNCTION testDateRangeBefore)
-   CALL FglUnit.register("testDateRangeOpenEnd",     FUNCTION testDateRangeOpenEnd)
-   CALL FglUnit.register("testDateRangeNullStart",   FUNCTION testDateRangeNullStart)
-
    EXIT PROGRAM FglUnit.run()
 END MAIN
 
@@ -104,31 +98,4 @@ END FUNCTION
 
 PUBLIC FUNCTION testOrderNumberNull() RETURNS ()
    CALL Assertions.assertNull(AwCalc.awOrderNumber(NULL), "NULL id gives NULL order number")
-END FUNCTION
-
-#--- awValidDateRange ----------------------------------------------------------
-
-PUBLIC FUNCTION testDateRangeAfter() RETURNS ()
-   CALL Assertions.assertTrue(AwCalc.awValidDateRange(MDY(1,1,2024), MDY(12,31,2024)),
-      "end after start is valid")
-END FUNCTION
-
-PUBLIC FUNCTION testDateRangeEqual() RETURNS ()
-   CALL Assertions.assertTrue(AwCalc.awValidDateRange(MDY(6,15,2024), MDY(6,15,2024)),
-      "end equal to start is valid")
-END FUNCTION
-
-PUBLIC FUNCTION testDateRangeBefore() RETURNS ()
-   CALL Assertions.assertFalse(AwCalc.awValidDateRange(MDY(12,31,2024), MDY(1,1,2024)),
-      "end before start is invalid")
-END FUNCTION
-
-PUBLIC FUNCTION testDateRangeOpenEnd() RETURNS ()
-   CALL Assertions.assertTrue(AwCalc.awValidDateRange(MDY(1,1,2024), NULL),
-      "open (NULL) end is valid")
-END FUNCTION
-
-PUBLIC FUNCTION testDateRangeNullStart() RETURNS ()
-   CALL Assertions.assertFalse(AwCalc.awValidDateRange(NULL, MDY(1,1,2024)),
-      "NULL start with a real end is invalid")
 END FUNCTION

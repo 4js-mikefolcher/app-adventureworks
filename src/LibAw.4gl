@@ -2,7 +2,7 @@
 # LibAw.4gl - shared services for the AdventureWorks Sales application.
 #
 # Reused by the domain modules not yet split into model and controller (Customers,
-# SalesOrders, SalesPersons, SpecialOffers); it is dissolved into helpers as each
+# SalesOrders, SalesPersons); it is dissolved into helpers as each
 # one migrates. Provides:
 #   * connection / disconnection to the "adventureworks" database
 #   * a single SQL-error reporting point
