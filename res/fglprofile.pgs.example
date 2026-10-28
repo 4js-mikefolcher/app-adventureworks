@@ -2,3 +2,9 @@ dbi.database.adventureworks.source = "adventureworks@localhost"
 dbi.database.adventureworks.driver = "dbmpgs_9"
 dbi.database.adventureworks.username = "adventureworks"
 dbi.database.adventureworks.password = "CHANGE_ME"
+
+# Let double quotes reach PostgreSQL as identifier delimiters. salesterritory."group" and
+# specialoffer."type" are reserved words; with the default (true) the driver turns every
+# double quote into a single quote, so a write fails with -201 and a read returns the
+# literal text of the column name.
+dbi.database.adventureworks.ifxemul.dblquotes = false

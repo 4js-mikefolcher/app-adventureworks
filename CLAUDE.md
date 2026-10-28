@@ -103,10 +103,12 @@ All new and modified Genero code follows the team standards in
 - The standards take precedence over the style of the surrounding code. Rules 1-10
   are fully applied to this repo: 3-space indent, camelCase names without
   underscores, Title Case file and module names, `VAR` locals, typed signatures,
-  named `TYPE`s and `IMPORT FGL` only (no linking). Rules 11-12 (MVC separation and
-  no cross-referencing) are **not yet applied**: the domain modules still mix
-  model and controller code and import `LibAw`/`AwCalc`/`AwRepo`. Do not restructure
-  them without the user's go-ahead. When asked, ask first about navigation from one
+  named `TYPE`s and `IMPORT FGL` only (no linking). Rules 11-13 (MVC separation,
+  no cross-referencing, JSON bridge) are being applied **one feature at a time**.
+  Migrated: `Territories` (`TerritoriesModel`, `TerritoriesController`, `Territories.per`).
+  Not yet: `Customers`, `SalesPersons`, `SpecialOffers` and `SalesOrders` still mix
+  model and controller code and import `LibAw`/`AwCalc`/`AwRepo`. Migrate the next
+  feature only when the user asks. When asked, ask first about navigation from one
   feature to another; the rest is settled in rules 11 and 12: helpers
   (`<Role>Helper.4gl`), lookups (`<Feature>Lookup.4gl`), the entry point
   (`MainController.4gl`, `MainMenuController.4gl`), and each `SELECT` living with the
@@ -117,6 +119,10 @@ All new and modified Genero code follows the team standards in
 
 ### Environment
 - Database name: `adventureworks` (connect via `res/fglprofile.pgs`, driver `dbmpgs_9`).
+  The profile must set `dbi.database.adventureworks.ifxemul.dblquotes = false` (the
+  `.example` does). Without it the driver turns every double quote into a single quote,
+  so the reserved-word columns `"group"` and `"type"` read as literal text and fail
+  with `-201` on INSERT/UPDATE.
 - Schema file: `adventureworks.sch` in the project root — 68 lowercase tables.
   Set `FGLDBPATH` to the project root so `SCHEMA adventureworks` resolves when
   compiling modules and forms (the Makefiles do this).
@@ -127,9 +133,17 @@ All new and modified Genero code follows the team standards in
 
 ### Architecture
 - Modular per-domain: one `.4gl` + `.per` per entity (`Customers`, `SalesOrders`,
-  `SalesPersons`, `Territories`, `SpecialOffers`), a shared `LibAw.4gl`, and
-  `Main.4gl` for navigation. Each domain module exposes one `*Run()` entry
-  (`customersRun()`, `salesOrdersRun()`, ...), called module-qualified from `Main`.
+  `SalesPersons`, `SpecialOffers`), a shared `LibAw.4gl`, and `Main.4gl` for
+  navigation. Each domain module exposes one `*Run()` entry (`customersRun()`,
+  `salesOrdersRun()`, ...), called module-qualified from `Main`.
+- Migrated features follow MVC: `Territories` is `TerritoriesModel.4gl` (database
+  record, insert/update/delete with their transactions, returns `(BOOLEAN, STRING)`),
+  `TerritoriesController.4gl` (view record, `toDbTerritory`, dialogs, the list SELECT,
+  `territoriesRun()`) and `Territories.per`. Its shared pieces are the leaf helpers
+  `DialogHelper.4gl` (`confirm`, UI, controllers only) and `SqlHelper.4gl`
+  (`errorText`, no UI, models may import it). `LibAw` shrinks as features migrate.
+- A model reads the SQL error **before** `ROLLBACK WORK` (the rollback resets it); the
+  controller shows the returned text with `ERROR`.
 - Reuse `LibAw`: `awConnect()`, `awDisconnect()`, `awSqlError()`, `awConfirm()`,
   `awFillComboBox()`, `awCustomerLabel()`, `awSalesPersonLabel()`.
 - Testable logic lives in two PUBLIC leaf libraries: `AwCalc.4gl` (pure
@@ -146,6 +160,8 @@ All new and modified Genero code follows the team standards in
 - fglunit can only call PUBLIC functions of an imported module — PRIVATE
   functions are untestable from outside (another reason to extract logic into
   `AwCalc`/`AwRepo`).
+- Every conversion function has a suite (rule 13): `TestTerritories` populates every
+  member that crosses the JSON bridge and asserts none came back NULL.
 - Resolve the fglunit package on the path with `eval "$(fglpkg env)"`, then
   prepend `bin/` (the app's compiled libraries) to `FGLLDPATH`.
 - DB-backed suites connect in `setupSuite` with TRY/CATCH and `skip()` every
@@ -160,7 +176,10 @@ All new and modified Genero code follows the team standards in
 - `CANCEL DELETE` is only valid in `INPUT ARRAY` `BEFORE DELETE`; in a
   `DISPLAY ARRAY` use a custom action and manage the array with `deleteElement()`.
 - Reserved-word columns `salesterritory."group"` and `specialoffer."type"` must be
-  double-quoted in SQL and mapped to safe record members (`groupName`, `offerType`).
+  double-quoted in dynamic SQL, which only works with `ifxemul.dblquotes = false` in
+  the profile (see Environment). A `RECORD LIKE salesterritory.*` names the member
+  `group` and `rec.group` compiles; a view record maps its safe member (`groupName`)
+  with `ATTRIBUTES(json_name = "group")`.
 - AdventureWorks computed columns were **dropped** in the PG port
   (`salesorderdetail.linetotal`, `salesorderheader.salesordernumber`/`totaldue`,
   `customer.accountnumber`) — compute them in 4GL, never SELECT them.

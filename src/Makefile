@@ -2,9 +2,10 @@
 # src/Makefile - compile the AdventureWorks Sales app modules and forms into the
 # bin/ output directory (BINDIR, passed in by the top-level Makefile).
 #
-# LibAw is compiled FIRST: every domain module does IMPORT FGL LibAw and
-# fglcomp must find bin/LibAw.42m (via FGLLDPATH, set by the parent Makefile) to
-# resolve the import. Main is compiled last (it imports every domain module).
+# The leaf libraries and helpers (LibAw, AwCalc, AwRepo, DialogHelper, SqlHelper) are
+# compiled FIRST: the domain modules import them and fglcomp must find the .42m
+# (via FGLLDPATH, set by the parent Makefile) to resolve each import. A model is
+# compiled before its controller. Main is compiled last (it imports every feature).
 # There is no link step: modules are resolved through IMPORT FGL alone.
 # FGLDBPATH must point at the directory holding adventureworks.sch so the SCHEMA
 # references resolve.
@@ -24,8 +25,9 @@ export FGLDBPATH FGLLDPATH
 
 # Order matters: libraries first, domain modules next, main last.
 # LIBS are leaf libraries (no inter-dependencies) that the domain modules import.
-LIBS    = LibAw.4gl AwCalc.4gl AwRepo.4gl
-MODULES = Territories.4gl SpecialOffers.4gl Customers.4gl SalesPersons.4gl SalesOrders.4gl
+LIBS    = LibAw.4gl AwCalc.4gl AwRepo.4gl DialogHelper.4gl SqlHelper.4gl
+MODULES = TerritoriesModel.4gl TerritoriesController.4gl \
+          SpecialOffers.4gl Customers.4gl SalesPersons.4gl SalesOrders.4gl
 MAINMOD = Main.4gl
 
 SRC     = $(LIBS) $(MODULES) $(MAINMOD)
@@ -48,6 +50,9 @@ $(LIB42): $(BINDIR)/%.42m: %.4gl | $(BINDIR)
 # Every domain/main module depends on all library objects (import resolution).
 $(filter-out $(LIB42),$(M42)): $(BINDIR)/%.42m: %.4gl $(LIB42) | $(BINDIR)
 	$(FGLCOMP) -M $(WARNFLAGS) -o $(BINDIR) $<
+
+# A controller imports its model, so the model is compiled first.
+$(BINDIR)/TerritoriesController.42m: $(BINDIR)/TerritoriesModel.42m
 
 # Forms: -W all, and any output at all (a warning or an error) fails the build.
 $(BINDIR)/%.42f: %.per | $(BINDIR)

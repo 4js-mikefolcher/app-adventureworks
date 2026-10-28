@@ -34,10 +34,14 @@ bin/                      compiled output: all *.42m and *.42f (generated; git-i
 docs/
   CodingStandards.md      team coding standards (also imported by CLAUDE.md)
 src/
-  Makefile                compiles lib first, then domain modules, then main; then forms
+  Makefile                compiles libs and helpers first, then each model before its controller, then main; then forms
   LibAw.4gl               shared: connect, SQL-error reporting, confirm, combobox fill, name lookups
+  DialogHelper.4gl        helper: yes/no confirmation dialog (controllers only)
+  SqlHelper.4gl           helper: SQL error text (no UI, models may use it)
   Main.4gl / Main.per     entry point + navigation menu
-  Territories.4gl/.per    \
+  TerritoriesModel.4gl       \  MVC feature: database record + writes,
+  TerritoriesController.4gl   |  dialogs + list SELECT + conversion,
+  Territories.per            /   and the form
   SpecialOffers.4gl/.per   |  one module + form per domain
   Customers.4gl/.per       |  (modular per-domain architecture)
   SalesPersons.4gl/.per    |
@@ -46,6 +50,7 @@ src/
   AwRepo.4gl              read-only data-access helpers (offer resolution, list price, existence)
 tests/
   TestAwCalc.4gl          fglunit suite for AwCalc (pure, no DB)
+  TestTerritories.4gl     fglunit suite for the Territories view-to-database conversion (no DB)
   TestData.4gl            fglunit suite for AwRepo + LibAw (live DB; skips if unavailable)
 ```
 
@@ -65,6 +70,9 @@ Connection details live in `res/fglprofile.pgs` (host `localhost:5432`, database
 `adventureworks`). The app connects at runtime with `CONNECT TO "adventureworks"`.
 `res/fglprofile.pgs` is git-ignored because it holds credentials: copy
 `res/fglprofile.pgs.example` to `res/fglprofile.pgs` and set the password for your database.
+Keep its `ifxemul.dblquotes = false` line: it lets the reserved-word columns
+`salesterritory."group"` and `specialoffer."type"` be double-quoted in SQL. Without it the
+driver sends them as string literals, so they read as the column's name and fail on write.
 
 ## Tests
 
@@ -73,11 +81,13 @@ Testable logic was extracted into two PUBLIC library modules so it can be exerci
 directly: `AwCalc` (pure) and `AwRepo` (data-access).
 
 ```bash
-make test     # compile + run both suites; writes bin/junit-*.xml
+make test     # compile + run all suites; writes bin/junit-*.xml
 ```
 
 - **TestAwCalc** — 16 pure tests (line/order totals incl. NULL handling, status
   labels, order-number format, date-range validation). No database.
+- **TestTerritories** — 3 tests of the JSON-bridge conversion from the view record to
+  the database record (every crossing member populated and asserted not NULL). No database.
 - **TestData** — 12 tests over `AwRepo` and `LibAw` name resolution against the
   live database (name formats, fallbacks, the `(specialofferid, productid)` FK
   resolution, product price, existence). Connects once in `setupSuite`; if the DB
