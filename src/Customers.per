@@ -1,0 +1,40 @@
+SCHEMA adventureworks
+
+LAYOUT (TEXT = "Customers")
+  VBOX
+    GROUP (TEXT = "Search criteria")
+      GRID
+      {
+        Customer ID: [fCustid     ]
+        Territory:   [fTerr                         ]
+      }
+      END
+    END
+    GROUP (TEXT = "Customers")
+      TABLE
+      {
+       ID        Type          Name                                       Territory
+      [rId      |rType        |rName                                     |rTerr              ]
+      }
+      END
+    END
+  END
+END
+
+TABLES
+  customer
+END
+
+ATTRIBUTES
+  EDIT     fCustid = customer.customerid;
+  COMBOBOX fTerr   = customer.territoryid, COMMENT = "Leave blank for any territory";
+
+  EDIT     rId   = FORMONLY.rId   TYPE INTEGER, NOENTRY;
+  EDIT     rType = FORMONLY.rType TYPE VARCHAR, NOENTRY;
+  EDIT     rName = FORMONLY.rName TYPE VARCHAR, NOENTRY;
+  COMBOBOX rTerr = FORMONLY.rTerr TYPE INTEGER;
+END
+
+INSTRUCTIONS
+  SCREEN RECORD srCustomers(rId, rType, rName, rTerr);
+END

@@ -1,8 +1,8 @@
 ################################################################################
-# lib_aw.4gl - shared services for the AdventureWorks Sales application.
+# LibAw.4gl - shared services for the AdventureWorks Sales application.
 #
-# Reused by every domain module (customers, salesorders, salespersons,
-# territories, specialoffers). Provides:
+# Reused by every domain module (Customers, SalesOrders, SalesPersons,
+# Territories, SpecialOffers). Provides:
 #   * connection / disconnection to the "adventureworks" database
 #   * a single SQL-error reporting point
 #   * a yes/no confirmation dialog
@@ -10,35 +10,35 @@
 #   * customer / salesperson display-name resolution (the base tables hold only
 #     ids; readable names live in person / store)
 #
-# No MAIN: this is a library module, linked into main via IMPORT FGL lib_aw.
+# No MAIN: this is a library module, imported by its callers with IMPORT FGL LibAw.
 ################################################################################
 
 #+ Database source name. Matches the FGLPROFILE entry in res/fglprofile.pgs and
 #+ the schema file adventureworks.sch.
-PUBLIC CONSTANT AW_DBNAME = "adventureworks"
+PUBLIC CONSTANT cAwDbName = "adventureworks"
 
 #-------------------------------------------------------------------------------
 #+ Connect to the AdventureWorks database. Credentials come from FGLPROFILE
 #+ (res/fglprofile.pgs). Returns TRUE on success; on failure reports the error
 #+ and returns FALSE so the caller can abort.
 #-------------------------------------------------------------------------------
-FUNCTION aw_connect() RETURNS BOOLEAN
-    TRY
-        CONNECT TO AW_DBNAME
-    CATCH
-        CALL aw_sql_error(SFMT("Connection to '%1' failed", AW_DBNAME))
-        RETURN FALSE
-    END TRY
-    RETURN TRUE
+PUBLIC FUNCTION awConnect() RETURNS BOOLEAN
+   TRY
+      CONNECT TO cAwDbName
+   CATCH
+      CALL awSqlError(SFMT("Connection to '%1' failed", cAwDbName))
+      RETURN FALSE
+   END TRY
+   RETURN TRUE
 END FUNCTION
 
 #-------------------------------------------------------------------------------
 #+ Close the current database connection (best-effort).
 #-------------------------------------------------------------------------------
-FUNCTION aw_disconnect()
-    WHENEVER ANY ERROR CONTINUE
-    DISCONNECT CURRENT
-    WHENEVER ANY ERROR STOP
+PUBLIC FUNCTION awDisconnect() RETURNS ()
+   WHENEVER ANY ERROR CONTINUE
+   DISCONNECT CURRENT
+   WHENEVER ANY ERROR STOP
 END FUNCTION
 
 #-------------------------------------------------------------------------------
@@ -46,52 +46,52 @@ END FUNCTION
 #+ Reads sqlca.sqlcode and the last SQL error message; safe to call right after
 #+ a CATCH.
 #+
-#+ @param p_context human description of the operation that failed
+#+ @param operation human description of the operation that failed
 #-------------------------------------------------------------------------------
-FUNCTION aw_sql_error(p_context STRING)
-    DEFINE l_code INTEGER
-    LET l_code = sqlca.sqlcode
-    ERROR SFMT("%1: SQL error %2 - %3", p_context, l_code, SQLERRMESSAGE)
+PUBLIC FUNCTION awSqlError(operation STRING) RETURNS ()
+   VAR code INTEGER = sqlca.sqlcode
+   ERROR SFMT("%1: SQL error %2 - %3", operation, code, SQLERRMESSAGE)
 END FUNCTION
 
 #-------------------------------------------------------------------------------
 #+ Modal yes/no confirmation. Returns TRUE only if the user picks "Yes".
 #+
-#+ @param p_title  dialog title
-#+ @param p_msg    confirmation question shown in the dialog body
+#+ @param dialogTitle dialog title
+#+ @param question    confirmation question shown in the dialog body
 #-------------------------------------------------------------------------------
-FUNCTION aw_confirm(p_title STRING, p_msg STRING) RETURNS BOOLEAN
-    DEFINE l_result BOOLEAN
-    LET l_result = FALSE
-    MENU p_title ATTRIBUTES(STYLE = "dialog", COMMENT = p_msg, IMAGE = "fa-question-circle")
-        COMMAND "No"
-            LET l_result = FALSE
-        COMMAND "Yes"
-            LET l_result = TRUE
-    END MENU
-    RETURN l_result
+PUBLIC FUNCTION awConfirm(dialogTitle STRING, question STRING) RETURNS BOOLEAN
+   VAR confirmed BOOLEAN = FALSE
+   MENU dialogTitle ATTRIBUTES(STYLE = "dialog", COMMENT = question, IMAGE = "fa-question-circle")
+      COMMAND "No"
+         LET confirmed = FALSE
+      COMMAND "Yes"
+         LET confirmed = TRUE
+   END MENU
+   RETURN confirmed
 END FUNCTION
 
 #-------------------------------------------------------------------------------
 #+ Populate a form COMBOBOX from a query returning two columns: (value, label).
 #+ The combobox is cleared first. Use full table names (no aliases) in the SQL.
+#+ The combobox is addressed by its form FIELD NAME (the FORMONLY name or
+#+ table.column), never by its layout tag.
 #+
-#+ @param p_field combobox field name as declared in the form
-#+ @param p_sql   SELECT returning exactly (value, label)
+#+ @param fieldName combobox field name as declared in the form
+#+ @param sqlText   SELECT returning exactly (value, label)
 #-------------------------------------------------------------------------------
-FUNCTION aw_fill_combobox(p_field STRING, p_sql STRING)
-    DEFINE l_cb ui.ComboBox
-    DEFINE l_value STRING
-    DEFINE l_label STRING
-    LET l_cb = ui.ComboBox.forName(p_field)
-    IF l_cb IS NULL THEN
-        RETURN
-    END IF
-    CALL l_cb.clear()
-    DECLARE c_fillcb CURSOR FROM p_sql
-    FOREACH c_fillcb INTO l_value, l_label
-        CALL l_cb.addItem(l_value, l_label)
-    END FOREACH
+PUBLIC FUNCTION awFillComboBox(fieldName STRING, sqlText STRING) RETURNS ()
+   VAR cb ui.ComboBox
+   VAR itemValue STRING
+   VAR itemLabel STRING
+   LET cb = ui.ComboBox.forName(fieldName)
+   IF cb IS NULL THEN
+      RETURN
+   END IF
+   CALL cb.clear()
+   DECLARE cursFillCombo CURSOR FROM sqlText
+   FOREACH cursFillCombo INTO itemValue, itemLabel
+      CALL cb.addItem(itemValue, itemLabel)
+   END FOREACH
 END FUNCTION
 
 #-------------------------------------------------------------------------------
@@ -99,40 +99,41 @@ END FUNCTION
 #+ to person via personid) or a store (joined to store via storeid). Returns a
 #+ best-effort label; never NULL.
 #+
-#+ @param p_customerid the customer.customerid
+#+ @param customerId the customer.customerid
 #-------------------------------------------------------------------------------
-FUNCTION aw_customer_label(p_customerid INTEGER) RETURNS STRING
-    DEFINE l_name STRING
-    LET l_name = NULL
-    SELECT CASE
-              WHEN store.name IS NOT NULL THEN store.name
-              ELSE TRIM(person.lastname) || ', ' || TRIM(person.firstname)
-           END
-      INTO l_name
+PUBLIC FUNCTION awCustomerLabel(customerId INTEGER) RETURNS STRING
+   VAR labelText STRING
+   LET labelText = NULL
+   SELECT
+         CASE
+            WHEN store.name IS NOT NULL THEN store.name
+            ELSE TRIM(person.lastname) || ', ' || TRIM(person.firstname)
+         END
+      INTO labelText
       FROM customer
       LEFT JOIN person ON person.businessentityid = customer.personid
       LEFT JOIN store  ON store.businessentityid  = customer.storeid
-     WHERE customer.customerid = p_customerid
-    IF l_name IS NULL THEN
-        LET l_name = SFMT("Customer %1", p_customerid)
-    END IF
-    RETURN l_name
+      WHERE customer.customerid = customerId
+   IF labelText IS NULL THEN
+      LET labelText = SFMT("Customer %1", customerId)
+   END IF
+   RETURN labelText
 END FUNCTION
 
 #-------------------------------------------------------------------------------
 #+ Resolve a salesperson's name from the person table.
 #+
-#+ @param p_beid the salesperson.businessentityid
+#+ @param entityId the salesperson.businessentityid
 #-------------------------------------------------------------------------------
-FUNCTION aw_salesperson_label(p_beid INTEGER) RETURNS STRING
-    DEFINE l_name STRING
-    LET l_name = NULL
-    SELECT TRIM(person.lastname) || ', ' || TRIM(person.firstname)
-      INTO l_name
+PUBLIC FUNCTION awSalesPersonLabel(entityId INTEGER) RETURNS STRING
+   VAR labelText STRING
+   LET labelText = NULL
+   SELECT TRIM(person.lastname) || ', ' || TRIM(person.firstname)
+      INTO labelText
       FROM person
-     WHERE person.businessentityid = p_beid
-    IF l_name IS NULL THEN
-        LET l_name = SFMT("Salesperson %1", p_beid)
-    END IF
-    RETURN l_name
+      WHERE person.businessentityid = entityId
+   IF labelText IS NULL THEN
+      LET labelText = SFMT("Salesperson %1", entityId)
+   END IF
+   RETURN labelText
 END FUNCTION

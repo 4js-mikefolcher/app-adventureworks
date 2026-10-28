@@ -1,0 +1,25 @@
+LAYOUT (TEXT = "Sales Persons")
+  VBOX
+    TABLE
+    {
+     ID       Name                                 Territory          Quota             Bonus            Comm%       Sales YTD
+    [cId     |cName                               |cTerr             |cQuota           |cBonus          |cComm      |cYtd             ]
+    }
+    END
+  END
+END
+
+ATTRIBUTES
+  EDIT     cId    = FORMONLY.businessEntityId TYPE INTEGER,       NOENTRY;
+  EDIT     cName  = FORMONLY.salesPersonName           TYPE VARCHAR,       NOENTRY;
+  COMBOBOX cTerr  = FORMONLY.territoryId      TYPE INTEGER;
+  EDIT     cQuota = FORMONLY.salesQuota       TYPE DECIMAL(20,4);
+  EDIT     cBonus = FORMONLY.bonus            TYPE DECIMAL(20,4), REQUIRED;
+  EDIT     cComm  = FORMONLY.commissionPct    TYPE DECIMAL(10,4), REQUIRED;
+  EDIT     cYtd   = FORMONLY.salesYtd         TYPE DECIMAL(20,4), NOENTRY;
+END
+
+INSTRUCTIONS
+  SCREEN RECORD srSalesPersons(businessEntityId, salesPersonName, territoryId, salesQuota,
+                      bonus, commissionPct, salesYtd);
+END

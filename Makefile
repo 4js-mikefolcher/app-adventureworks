@@ -20,6 +20,9 @@
 DBSRC    ?= adventureworks
 FGLCOMP  ?= fglcomp
 FGLRUN   ?= fglrun
+# Any compiler warning fails the build (fglcomp -Werror; forms are checked in
+# src/Makefile). Passed down to src/Makefile and used for the test suites below.
+WARNFLAGS ?= -Wall -Werror
 PROFILE  ?= $(CURDIR)/res/fglprofile.pgs
 BIN      := $(CURDIR)/bin
 
@@ -37,23 +40,23 @@ all: build
 
 help:
 	@echo "Targets: build | run | run-tui | test | clean"
-	@echo "  build   compile src/*.4gl and src/*.per into bin/"
+	@echo "  build   compile src/*.4gl and src/*.per into bin/ (any warning fails the build)"
 	@echo "  run     launch the app (desktop client - requires DB '$(DBSRC)')"
 	@echo "  run-tui launch headless in terminal mode (smoke test)"
 	@echo "  test    compile and run the fglunit suites (JUnit XML in bin/)"
 
 build:
 	@mkdir -p $(BIN)
-	$(MAKE) -C src BINDIR=$(BIN)
+	$(MAKE) -C src BINDIR=$(BIN) WARNFLAGS="$(WARNFLAGS)"
 
 # Desktop (GDC) run. The same compiled program also serves GBC via GAS.
 run: build
-	FGLPROFILE=$(PROFILE) $(FGLRUN) $(BIN)/main.42m
+	FGLPROFILE=$(PROFILE) $(FGLRUN) $(BIN)/Main.42m
 
 # Headless terminal-mode run - useful to confirm DB connect + startup without a
 # front-end. Still requires the live database.
 run-tui: build
-	FGLGUI=0 TERM=xterm FGLPROFILE=$(PROFILE) $(FGLRUN) $(BIN)/main.42m
+	FGLGUI=0 TERM=xterm FGLPROFILE=$(PROFILE) $(FGLRUN) $(BIN)/Main.42m
 
 # Unit tests. Compiles the suites against the app's compiled libraries in bin/
 # and the installed fglunit package, then runs each suite (writing JUnit XML).
@@ -61,12 +64,12 @@ run-tui: build
 # tests gracefully if the database is not reachable. `make` stops on the first
 # suite that reports a failure or error.
 test: build
-	$(TESTENV) && $(FGLCOMP) -M -Wall -o $(BIN) tests/test_aw_calc.4gl
-	$(TESTENV) && $(FGLCOMP) -M -Wall -o $(BIN) tests/test_data.4gl
-	@echo "== test_aw_calc =="
-	$(TESTENV) && $(FGLRUN) $(BIN)/test_aw_calc.42m --junit $(BIN)/junit-aw_calc.xml
-	@echo "== test_data =="
-	$(TESTENV) && FGLPROFILE=$(PROFILE) $(FGLRUN) $(BIN)/test_data.42m --junit $(BIN)/junit-data.xml
+	$(TESTENV) && $(FGLCOMP) -M $(WARNFLAGS) -o $(BIN) tests/TestAwCalc.4gl
+	$(TESTENV) && $(FGLCOMP) -M $(WARNFLAGS) -o $(BIN) tests/TestData.4gl
+	@echo "== TestAwCalc =="
+	$(TESTENV) && $(FGLRUN) $(BIN)/TestAwCalc.42m --junit $(BIN)/junit-AwCalc.xml
+	@echo "== TestData =="
+	$(TESTENV) && FGLPROFILE=$(PROFILE) $(FGLRUN) $(BIN)/TestData.42m --junit $(BIN)/junit-Data.xml
 
 clean:
 	$(RM) -r $(BIN)

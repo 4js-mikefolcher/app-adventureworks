@@ -1,0 +1,60 @@
+LAYOUT (TEXT = "Sales Order")
+  VBOX
+    GROUP (TEXT = "Order")
+      GRID
+      {
+        Order #:      [fSonum         ]      Order Date: [fOdate      ]
+        Customer:     [fCust                                               ]
+        Status:       [fStatus               ]   Ship Date:  [fShipdate   ]
+        Sales Person: [fSp                   ]   Territory:  [fTerr             ]
+        Comment:      [fComment                                            ]
+      }
+      END
+    END
+    GROUP (TEXT = "Line Items")
+      TABLE
+      {
+       Product                              Offer                  Qty      Unit Price       Disc        Line Total
+      [lProd                               |lOffer                |lQty    |lPrice          |lDisc      |lTotal         ]
+      }
+      END
+    END
+    GROUP (TEXT = "Totals")
+      GRID
+      {
+        Subtotal: [fSubtotal      ]   Tax: [fTax         ]   Freight: [fFreight     ]   Total Due: [fTotal       ]
+      }
+      END
+    END
+  END
+END
+
+ATTRIBUTES
+  EDIT     fSonum    = FORMONLY.salesOrderNumber TYPE VARCHAR,       NOENTRY;
+  DATEEDIT fOdate    = FORMONLY.orderDate        TYPE DATE,          NOENTRY;
+  EDIT     fCust     = FORMONLY.customerName         TYPE VARCHAR,       NOENTRY;
+  COMBOBOX fStatus   = FORMONLY.statusCode           TYPE INTEGER;
+  DATEEDIT fShipdate = FORMONLY.shipDate         TYPE DATE;
+  COMBOBOX fSp       = FORMONLY.salesPersonId    TYPE INTEGER;
+  COMBOBOX fTerr     = FORMONLY.territoryId      TYPE INTEGER;
+  EDIT     fComment  = FORMONLY.comment          TYPE VARCHAR;
+  EDIT     fSubtotal = FORMONLY.subtotal         TYPE DECIMAL(20,4), NOENTRY;
+  EDIT     fTax      = FORMONLY.taxAmt           TYPE DECIMAL(20,4), NOENTRY;
+  EDIT     fFreight  = FORMONLY.freight          TYPE DECIMAL(20,4), NOENTRY;
+  EDIT     fTotal    = FORMONLY.totalDue         TYPE DECIMAL(20,4), NOENTRY;
+
+  COMBOBOX lProd  = FORMONLY.productId         TYPE INTEGER,       REQUIRED;
+  COMBOBOX lOffer = FORMONLY.specialOfferId    TYPE INTEGER,       NOENTRY;
+  EDIT     lQty   = FORMONLY.orderQty          TYPE INTEGER,       REQUIRED;
+  EDIT     lPrice = FORMONLY.unitPrice         TYPE DECIMAL(20,4), REQUIRED;
+  EDIT     lDisc  = FORMONLY.unitPriceDiscount TYPE DECIMAL(10,4);
+  EDIT     lTotal = FORMONLY.lineTotal         TYPE DECIMAL(20,4), NOENTRY;
+END
+
+INSTRUCTIONS
+  SCREEN RECORD srHeader(salesOrderNumber, orderDate, customerName, statusCode, shipDate,
+                       salesPersonId, territoryId, comment, subtotal, taxAmt,
+                       freight, totalDue);
+  SCREEN RECORD srLines(productId, specialOfferId, orderQty, unitPrice,
+                         unitPriceDiscount, lineTotal);
+END

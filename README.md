@@ -31,20 +31,22 @@ adventureworks.sch        Genero schema (68 tables, lowercase) — used at compi
 res/fglprofile.pgs        PostgreSQL connection profile (database name: adventureworks)
 Makefile                  build / run / clean (sets FGLDBPATH, FGLLDPATH, FGLRESOURCEPATH)
 bin/                      compiled output: all *.42m and *.42f (generated; git-ignore)
+docs/
+  CodingStandards.md      team coding standards (also imported by CLAUDE.md)
 src/
   Makefile                compiles lib first, then domain modules, then main; then forms
-  lib_aw.4gl              shared: connect, SQL-error reporting, confirm, combobox fill, name lookups
-  main.4gl / main.per     entry point + navigation menu
-  territories.4gl/.per    \
-  specialoffers.4gl/.per   |  one module + form per domain
-  customers.4gl/.per       |  (modular per-domain architecture)
-  salespersons.4gl/.per    |
-  salesorders.4gl + salesorders.per + salesorders_list.per   master-detail centerpiece
-  aw_calc.4gl             pure derived-value logic (line/order totals, status label, order no.)
-  aw_repo.4gl             read-only data-access helpers (offer resolution, list price, existence)
+  LibAw.4gl               shared: connect, SQL-error reporting, confirm, combobox fill, name lookups
+  Main.4gl / Main.per     entry point + navigation menu
+  Territories.4gl/.per    \
+  SpecialOffers.4gl/.per   |  one module + form per domain
+  Customers.4gl/.per       |  (modular per-domain architecture)
+  SalesPersons.4gl/.per    |
+  SalesOrders.4gl + SalesOrders.per + SalesOrdersList.per   master-detail centerpiece
+  AwCalc.4gl              pure derived-value logic (line/order totals, status label, order no.)
+  AwRepo.4gl              read-only data-access helpers (offer resolution, list price, existence)
 tests/
-  test_aw_calc.4gl        fglunit suite for aw_calc (pure, no DB)
-  test_data.4gl           fglunit suite for aw_repo + lib_aw (live DB; skips if unavailable)
+  TestAwCalc.4gl          fglunit suite for AwCalc (pure, no DB)
+  TestData.4gl            fglunit suite for AwRepo + LibAw (live DB; skips if unavailable)
 ```
 
 All compiled artifacts are written to `bin/` (via `fglcomp -o` / `fglform -o`).
@@ -53,7 +55,7 @@ The runtime finds them through `FGLLDPATH`/`FGLRESOURCEPATH` (set by the Makefil
 ## Build & run
 
 ```bash
-make build      # compile all .4gl and .per (zero errors/warnings expected)
+make build      # compile all .4gl and .per; any compiler warning fails the build
 make run        # launch under the desktop client (GDC must be running)
 make run-tui    # headless terminal run (connect smoke test; complex forms need a real client)
 make clean      # remove compiled .42m / .42f
@@ -68,30 +70,30 @@ Connection details live in `res/fglprofile.pgs` (host `localhost:5432`, database
 
 Unit tests use **fglunit** (xUnit for Genero BDL; installed via `fglpkg install fglunit`).
 Testable logic was extracted into two PUBLIC library modules so it can be exercised
-directly: `aw_calc` (pure) and `aw_repo` (data-access).
+directly: `AwCalc` (pure) and `AwRepo` (data-access).
 
 ```bash
 make test     # compile + run both suites; writes bin/junit-*.xml
 ```
 
-- **test_aw_calc** — 16 pure tests (line/order totals incl. NULL handling, status
+- **TestAwCalc** — 16 pure tests (line/order totals incl. NULL handling, status
   labels, order-number format, date-range validation). No database.
-- **test_data** — 12 tests over `aw_repo` and `lib_aw` name resolution against the
+- **TestData** — 12 tests over `AwRepo` and `LibAw` name resolution against the
   live database (name formats, fallbacks, the `(specialofferid, productid)` FK
-  resolution, product price, existence). Connects once in `setUpSuite`; if the DB
+  resolution, product price, existence). Connects once in `setupSuite`; if the DB
   is unreachable every test **skips** (the suite stays green), so it's CI-safe.
 
 Each suite is a standalone program — run one directly with the documented flags:
 
 ```bash
 eval "$(fglpkg env)" && export FGLLDPATH="$PWD/bin:$FGLLDPATH"
-fglrun bin/test_aw_calc.42m -v
-fglrun bin/test_data.42m --filter resolve_offer --junit out.xml
+fglrun bin/TestAwCalc.42m -v
+fglrun bin/TestData.42m --filter ResolveOffer --junit out.xml
 ```
 
 ### Running under GBC
 GBC rendering requires the Genero Application Server (GAS). Point a GAS
-application configuration at `src/main.42m` (with `FGLDBPATH`/`FGLRESOURCEPATH`
+application configuration at `bin/Main.42m` (with `FGLDBPATH`/`FGLRESOURCEPATH`
 as in the Makefile), or launch the app through Genero Studio's embedded GAS.
 `make run` / GDC is the quickest path for local functional testing.
 
@@ -99,12 +101,14 @@ as in the Makefile), or launch the app through Genero Studio's embedded GAS.
 
 - Authoritative Genero guidance comes from the **Genero MCP skills** (see
   `CLAUDE.md`), not from model memory.
+- Genero code follows the team [coding standards](docs/CodingStandards.md)
+  (3-space indent, camelCase, `VAR` locals, typed signatures, `IMPORT FGL`).
 - Static SQL where possible; parameterised dynamic SQL otherwise; all writes in
   short `BEGIN/COMMIT WORK` transactions with `TRY/CATCH` error handling.
 - Reserved-word columns (`salesterritory."group"`, `specialoffer."type"`) are
   mapped to safe record members and quoted in SQL.
 - Foreign-key/constraint violations surface as friendly messages via
-  `lib_aw.aw_sql_error()`.
+  `LibAw.awSqlError()`.
 
 ## Notes & limitations
 

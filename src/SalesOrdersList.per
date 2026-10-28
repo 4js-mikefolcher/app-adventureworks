@@ -1,0 +1,41 @@
+SCHEMA adventureworks
+
+LAYOUT (TEXT = "Sales Orders")
+  VBOX
+    GROUP (TEXT = "Search criteria")
+      GRID
+      {
+        Order ID: [qSoid       ]    Customer ID: [qCust       ]
+      }
+      END
+    END
+    GROUP (TEXT = "Orders")
+      TABLE
+      {
+       ID         Order #         Date          Customer                              Status          Total Due
+      [oId       |oNum           |oDate        |oCust                                |oStatus        |oTotal         ]
+      }
+      END
+    END
+  END
+END
+
+TABLES
+  salesorderheader
+END
+
+ATTRIBUTES
+  EDIT qSoid = salesorderheader.salesorderid;
+  EDIT qCust = salesorderheader.customerid;
+
+  EDIT     oId     = FORMONLY.oId     TYPE INTEGER,       NOENTRY;
+  EDIT     oNum    = FORMONLY.oNum    TYPE VARCHAR,       NOENTRY;
+  DATEEDIT oDate   = FORMONLY.oDate   TYPE DATE,          NOENTRY;
+  EDIT     oCust   = FORMONLY.oCust   TYPE VARCHAR,       NOENTRY;
+  EDIT     oStatus = FORMONLY.oStatus TYPE VARCHAR,       NOENTRY;
+  EDIT     oTotal  = FORMONLY.oTotal  TYPE DECIMAL(20,4), NOENTRY;
+END
+
+INSTRUCTIONS
+  SCREEN RECORD srOrders(oId, oNum, oDate, oCust, oStatus, oTotal);
+END

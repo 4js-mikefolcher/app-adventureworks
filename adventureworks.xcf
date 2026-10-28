@@ -2,17 +2,17 @@
 <!--
   GAS application configuration for the AdventureWorks Sales app (GBC / web).
 
-  This is the only runnable program in the project: src/main.4gl is the single
-  module with a MAIN block (the domain modules - territories, customers,
-  salespersons, specialoffers, salesorders - are libraries invoked via their
-  *_run() functions).
+  This is the only runnable program in the project: src/Main.4gl is the single
+  module with a MAIN block (the domain modules - Territories, Customers,
+  SalesPersons, SpecialOffers, SalesOrders - are libraries invoked via their
+  *Run() functions).
 
   Deployment:
     * Keep this file at the project root. $(application.path) resolves to the
       directory holding this .xcf, so the paths below are portable.
     * Register the project root as a GAS application directory, or copy this
       file into your GAS $(res.appdata.path)/app directory.
-    * Build first: `make build` (produces bin/main.42m and the .42f forms).
+    * Build first: `make build` (produces bin/Main.42m and the .42f forms).
     * The database "adventureworks" must already exist and be populated.
 -->
 <APPLICATION Parent="defaultgwc"
@@ -26,7 +26,7 @@
     <ENVIRONMENT_VARIABLE Id="FGLPROFILE">$(application.path)/res/fglprofile.pgs</ENVIRONMENT_VARIABLE>
     <PATH>$(application.path)/bin</PATH>
     <DVM>fglrun</DVM>
-    <MODULE>main</MODULE>
+    <MODULE>Main</MODULE>
 
   </EXECUTION>
 </APPLICATION>
