@@ -191,6 +191,11 @@ All new and modified Genero code follows the team standards in
 - `salesorderdetail` has a composite FK on `(specialofferid, productid)` into
   `specialofferproduct`: only sellable products may be ordered, and the offer must
   be valid for the product (resolved in `AwRepo.repoResolveOffer()`).
+- A `TABLE` shows as many rows as its layout has data lines: one line means a page of
+  one row (the runtime reports `pageSize="1"`), however many records are loaded. The list
+  forms repeat the data line (Territories 12, SalesPersons 20, SpecialOffers 20, Customers 15,
+  SalesOrdersList 15, SalesOrders line items 8). Keep that when adding a list form. The
+  dialogs address rows with `scr_line()`, so they work on any screen line.
 - In `adventureworks.xcf`, never build paths from the predefined `application.path`
   resource: GAS derives it from `EXECUTION/PATH`, so `<PATH>$(application.path)/bin` is
   circular and resolves to `/bin` (DVM starts in `/bin/bin`, request times out after 10 s,
