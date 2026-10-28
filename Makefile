@@ -68,12 +68,15 @@ test: build
 	$(TESTENV) && $(FGLCOMP) -M $(WARNFLAGS) -o $(BIN) tests/TestData.4gl
 	$(TESTENV) && $(FGLCOMP) -M $(WARNFLAGS) -o $(BIN) tests/TestTerritories.4gl
 	$(TESTENV) && $(FGLCOMP) -M $(WARNFLAGS) -o $(BIN) tests/TestSpecialOffers.4gl
+	$(TESTENV) && $(FGLCOMP) -M $(WARNFLAGS) -o $(BIN) tests/TestSalesPersons.4gl
 	@echo "== TestAwCalc =="
 	$(TESTENV) && $(FGLRUN) $(BIN)/TestAwCalc.42m --junit $(BIN)/junit-AwCalc.xml
 	@echo "== TestTerritories =="
 	$(TESTENV) && $(FGLRUN) $(BIN)/TestTerritories.42m --junit $(BIN)/junit-Territories.xml
 	@echo "== TestSpecialOffers =="
 	$(TESTENV) && $(FGLRUN) $(BIN)/TestSpecialOffers.42m --junit $(BIN)/junit-SpecialOffers.xml
+	@echo "== TestSalesPersons =="
+	$(TESTENV) && $(FGLRUN) $(BIN)/TestSalesPersons.42m --junit $(BIN)/junit-SalesPersons.xml
 	@echo "== TestData =="
 	$(TESTENV) && FGLPROFILE=$(PROFILE) $(FGLRUN) $(BIN)/TestData.42m --junit $(BIN)/junit-Data.xml
 

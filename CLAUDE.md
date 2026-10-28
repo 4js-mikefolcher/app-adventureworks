@@ -105,9 +105,9 @@ All new and modified Genero code follows the team standards in
   underscores, Title Case file and module names, `VAR` locals, typed signatures,
   named `TYPE`s and `IMPORT FGL` only (no linking). Rules 11-13 (MVC separation,
   no cross-referencing, JSON bridge) are being applied **one feature at a time**.
-  Migrated: `Territories` and `SpecialOffers` (each a `<Feature>Model`,
+  Migrated: `Territories`, `SpecialOffers` and `SalesPersons` (each a `<Feature>Model`,
   `<Feature>Controller` and `<Feature>.per`).
-  Not yet: `Customers`, `SalesPersons` and `SalesOrders` still mix
+  Not yet: `Customers` and `SalesOrders` still mix
   model and controller code and import `LibAw`/`AwCalc`/`AwRepo`. Migrate the next
   feature only when the user asks. When asked, ask first about navigation from one
   feature to another; the rest is settled in rules 11 and 12: helpers
@@ -133,8 +133,8 @@ All new and modified Genero code follows the team standards in
 - This app does **not** build or load the database (that is `fgl-adventureworks`).
 
 ### Architecture
-- Modular per-domain: one `.4gl` + `.per` per entity (`Customers`, `SalesOrders`,
-  `SalesPersons`), a shared `LibAw.4gl`, and `Main.4gl` for
+- Modular per-domain: one `.4gl` + `.per` per entity not yet migrated (`Customers`, `SalesOrders`), a shared
+  `LibAw.4gl`, and `Main.4gl` for
   navigation. Each domain module exposes one `*Run()` entry (`customersRun()`,
   `salesOrdersRun()`, ...), called module-qualified from `Main`.
 - Migrated features follow MVC: `Territories` is `TerritoriesModel.4gl` (database
@@ -146,7 +146,12 @@ All new and modified Genero code follows the team standards in
   `SpecialOffers` has the same shape and adds two things: validation in the model
   (`validateOfferDates`, `validateOfferQuantities`; the controller shows the message and
   picks the field), and a conversion special case (the view holds DATEs, the columns are
-  DATETIMEs, so `toDbOffer` assigns the dates after the bridge).
+  DATETIMEs, so `toDbOffer` assigns the dates after the bridge). `SalesPersons` has no
+  insert (a salesperson is an existing employee) and shows a controller SELECT that joins
+  `person` for the display name (not a lookup).
+- Lookups (rule 12): `TerritoriesLookup.4gl` fills the territory comboboxes
+  (`fillTerritories(comboBox ui.ComboBox)`; the controller passes
+  `ui.ComboBox.forName(<field name>)`; lazy cursor, leaf, controllers only).
 - A model reads the SQL error **before** `ROLLBACK WORK` (the rollback resets it); the
   controller shows the returned text with `ERROR`.
 - Reuse `LibAw`: `awConnect()`, `awDisconnect()`, `awSqlError()`, `awConfirm()`,

@@ -2,10 +2,11 @@
 # src/Makefile - compile the AdventureWorks Sales app modules and forms into the
 # bin/ output directory (BINDIR, passed in by the top-level Makefile).
 #
-# The leaf libraries and helpers (LibAw, AwCalc, AwRepo, DialogHelper, SqlHelper) are
-# compiled FIRST: the domain modules import them and fglcomp must find the .42m
-# (via FGLLDPATH, set by the parent Makefile) to resolve each import. A model is
-# compiled before its controller. Main is compiled last (it imports every feature).
+# The leaf libraries, helpers and lookups (LibAw, AwCalc, AwRepo, DialogHelper,
+# SqlHelper, TerritoriesLookup) are compiled FIRST: the domain modules import them
+# and fglcomp must find the .42m (via FGLLDPATH, set by the parent Makefile) to
+# resolve each import. A model is compiled before its controller. Main is compiled
+# last (it imports every feature).
 # There is no link step: modules are resolved through IMPORT FGL alone.
 # FGLDBPATH must point at the directory holding adventureworks.sch so the SCHEMA
 # references resolve.
@@ -25,10 +26,11 @@ export FGLDBPATH FGLLDPATH
 
 # Order matters: libraries first, domain modules next, main last.
 # LIBS are leaf libraries (no inter-dependencies) that the domain modules import.
-LIBS    = LibAw.4gl AwCalc.4gl AwRepo.4gl DialogHelper.4gl SqlHelper.4gl
+LIBS    = LibAw.4gl AwCalc.4gl AwRepo.4gl DialogHelper.4gl SqlHelper.4gl TerritoriesLookup.4gl
 MODULES = TerritoriesModel.4gl TerritoriesController.4gl \
           SpecialOffersModel.4gl SpecialOffersController.4gl \
-          Customers.4gl SalesPersons.4gl SalesOrders.4gl
+          SalesPersonsModel.4gl SalesPersonsController.4gl \
+          Customers.4gl SalesOrders.4gl
 MAINMOD = Main.4gl
 
 SRC     = $(LIBS) $(MODULES) $(MAINMOD)
@@ -55,6 +57,7 @@ $(filter-out $(LIB42),$(M42)): $(BINDIR)/%.42m: %.4gl $(LIB42) | $(BINDIR)
 # A controller imports its model, so the model is compiled first.
 $(BINDIR)/TerritoriesController.42m: $(BINDIR)/TerritoriesModel.42m
 $(BINDIR)/SpecialOffersController.42m: $(BINDIR)/SpecialOffersModel.42m
+$(BINDIR)/SalesPersonsController.42m: $(BINDIR)/SalesPersonsModel.42m
 
 # Forms: -W all, and any output at all (a warning or an error) fails the build.
 $(BINDIR)/%.42f: %.per | $(BINDIR)

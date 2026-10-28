@@ -38,6 +38,7 @@ src/
   LibAw.4gl               shared: connect, SQL-error reporting, confirm, combobox fill, name lookups
   DialogHelper.4gl        helper: yes/no confirmation dialog (controllers only)
   SqlHelper.4gl           helper: SQL error text (no UI, models may use it)
+  TerritoriesLookup.4gl   lookup: fills territory comboboxes (controllers only)
   Main.4gl / Main.per     entry point + navigation menu
   TerritoriesModel.4gl       \  MVC feature: database record + writes,
   TerritoriesController.4gl   |  dialogs + list SELECT + conversion,
@@ -45,8 +46,10 @@ src/
   SpecialOffersModel.4gl       \  MVC feature, same shape as Territories plus the
   SpecialOffersController.4gl   |  validation in the model
   SpecialOffers.per            /
-  Customers.4gl/.per       \  one module + form per domain
-  SalesPersons.4gl/.per    /  (not yet split into model and controller)
+  SalesPersonsModel.4gl        \  MVC feature: update/delete + validation in the model,
+  SalesPersonsController.4gl    |  list SELECT + territory lookup in the controller
+  SalesPersons.per             /
+  Customers.4gl/.per       one module + form per domain (not yet split into model and controller)
   SalesOrders.4gl + SalesOrders.per + SalesOrdersList.per   master-detail centerpiece
   AwCalc.4gl              pure derived-value logic (line/order totals, status label, order no.)
   AwRepo.4gl              read-only data-access helpers (offer resolution, list price, existence)
@@ -54,6 +57,7 @@ tests/
   TestAwCalc.4gl          fglunit suite for AwCalc (pure, no DB)
   TestTerritories.4gl     fglunit suite for the Territories view-to-database conversion (no DB)
   TestSpecialOffers.4gl   fglunit suite for the SpecialOffers conversion and validation (no DB)
+  TestSalesPersons.4gl    fglunit suite for the SalesPersons conversion and validation (no DB)
   TestData.4gl            fglunit suite for AwRepo + LibAw (live DB; skips if unavailable)
 ```
 
@@ -93,6 +97,8 @@ make test     # compile + run all suites; writes bin/junit-*.xml
   the database record (every crossing member populated and asserted not NULL). No database.
 - **TestSpecialOffers** — 14 tests: the same conversion check, including the DATE to
   DATETIME special case, plus the date-range and quantity-range validation. No database.
+- **TestSalesPersons** — 9 tests: the conversion check (every crossing member populated, NULL
+  quota kept) plus the non-negative validation. No database.
 - **TestData** — 12 tests over `AwRepo` and `LibAw` name resolution against the
   live database (name formats, fallbacks, the `(specialofferid, productid)` FK
   resolution, product price, existence). Connects once in `setupSuite`; if the DB
