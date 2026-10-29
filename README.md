@@ -33,6 +33,7 @@ Makefile                  build / run / clean (sets FGLDBPATH, FGLLDPATH, FGLRES
 bin/                      compiled output: all *.42m and *.42f (generated; git-ignore)
 docs/
   CodingStandards.md      team coding standards (also imported by CLAUDE.md)
+  GeneroDeveloperContext.md  generic Genero context, the Four Js canonical block (imported by CLAUDE.md)
 src/
   Makefile                compiles libs and helpers first, then each model before its controller, then main; then forms
   LibAw.4gl               shared: connect, SQL-error reporting, confirm, combobox fill, name lookups
@@ -144,7 +145,7 @@ out after 10 seconds while the page itself still loads.
 ## Conventions
 
 - Authoritative Genero guidance comes from the **Genero MCP skills** (see
-  `CLAUDE.md`), not from model memory.
+  `docs/GeneroDeveloperContext.md`), not from model memory.
 - Genero code follows the team [coding standards](docs/CodingStandards.md)
   (3-space indent, camelCase, `VAR` locals, typed signatures, `IMPORT FGL`).
 - Static SQL where possible; parameterised dynamic SQL otherwise; all writes in
