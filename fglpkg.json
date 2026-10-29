@@ -4,10 +4,12 @@
   "description": "Genero BDL Application for the AdventureWorks database",
   "author": "mifo@4js.com",
   "license": "UNLICENSED",
-  "dependencies": {},
+  "dependencies": {
+  },
   "devDependencies": {
     "fgl": {
-      "fglunit": "^1.0.0"
+      "fglunit": "^1.0.0",
+      "4js-fgltest": "1.1.2"
     }
   }
 }
