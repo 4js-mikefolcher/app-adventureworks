@@ -21,6 +21,7 @@ IMPORT FGL TerritoriesController
 PUBLIC FUNCTION mainMenuRun() RETURNS ()
    OPEN WINDOW wMainMenu WITH FORM "MainMenu" ATTRIBUTES(TEXT = "AdventureWorks Sales")
 
+   LET int_flag = FALSE
    MENU "Sales"
       ON ACTION orders
          CALL SalesOrdersController.salesOrdersRun()

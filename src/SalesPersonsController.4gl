@@ -80,6 +80,7 @@ END FUNCTION
 #-------------------------------------------------------------------------------
 PRIVATE FUNCTION browseSalesPersons() RETURNS ()
    VAR rec tSalesPersonView
+   LET int_flag = FALSE
    DISPLAY ARRAY salesPersonList TO srSalesPersons.* ATTRIBUTES(DOUBLECLICK = update, UNBUFFERED)
 
       ON UPDATE

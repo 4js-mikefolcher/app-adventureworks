@@ -57,7 +57,8 @@ src/
   SalesOrdersModel.4gl         \  MVC feature, the centerpiece (master-detail): derived values,
   SalesOrdersController.4gl     |  validation, offer resolution and header+lines saves in the model;
   SalesOrders.per               |  dialogs, list/header/line SELECTs and conversions in the controller
-  SalesOrdersList.per          /   (the second view: search and result list)
+  SalesOrdersList.per           |  (the second view: search and result list)
+  NewOrder.per                 /   (the third view: the customer id asked for before a new order)
   SalesPersonsLookup.4gl, ProductsLookup.4gl, SpecialOffersLookup.4gl   lookups (controllers only)
 tests/
   TestTerritories.4gl     fglunit suite for the Territories view-to-database conversion (no DB)

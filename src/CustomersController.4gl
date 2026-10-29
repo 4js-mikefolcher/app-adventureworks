@@ -18,7 +18,7 @@ IMPORT FGL DialogHelper
 IMPORT FGL TerritoriesLookup
 
 #+ Maximum customers loaded per search (keeps the list responsive).
-PRIVATE CONSTANT cMaxRows = 500
+PRIVATE CONSTANT cMaxRows = 1000
 
 #+ The view record: one customer row as shown in the list. The type and the name are
 #+ resolved by join for display only; the JSON bridge ignores them.
@@ -78,6 +78,7 @@ END FUNCTION
 #+ launched a search, FALSE if they cancelled (to leave the screen).
 #-------------------------------------------------------------------------------
 PRIVATE FUNCTION searchCustomers() RETURNS BOOLEAN
+   LET int_flag = FALSE
    CONSTRUCT BY NAME searchWhere ON customer.customerid, customer.territoryid
    RETURN (NOT int_flag)
 END FUNCTION
@@ -121,6 +122,7 @@ END FUNCTION
 #-------------------------------------------------------------------------------
 PRIVATE FUNCTION browseCustomers() RETURNS ()
    VAR rec tCustomerView
+   LET int_flag = FALSE
    DISPLAY ARRAY customerList TO srCustomers.* ATTRIBUTES(DOUBLECLICK = update, UNBUFFERED)
 
       ON UPDATE

@@ -75,6 +75,7 @@ END FUNCTION
 #-------------------------------------------------------------------------------
 PRIVATE FUNCTION browseTerritories() RETURNS ()
    VAR rec tTerritoryView
+   LET int_flag = FALSE
    DISPLAY ARRAY territoryList TO srTerritories.* ATTRIBUTES(DOUBLECLICK = update, UNBUFFERED)
 
       ON UPDATE

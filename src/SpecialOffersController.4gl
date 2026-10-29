@@ -84,6 +84,7 @@ END FUNCTION
 #-------------------------------------------------------------------------------
 PRIVATE FUNCTION browseOffers() RETURNS ()
    VAR rec tOfferView
+   LET int_flag = FALSE
    DISPLAY ARRAY offerList TO srOffers.* ATTRIBUTES(DOUBLECLICK = update, UNBUFFERED)
 
       ON UPDATE

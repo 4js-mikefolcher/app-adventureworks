@@ -2,15 +2,15 @@
 # SalesOrdersController.4gl - the centerpiece: browse, view and edit sales orders
 # with their line items as a master-detail screen.
 #
-# Two views: SalesOrdersList (query-by-example search and the result list) and
-# SalesOrders (the header and the editable line-item grid). The controller owns the
-# dialogs, the user flow and the SELECTs that fill the screens: the order list, the
-# header and the lines, the customer name (resolved by join) and the list-price
-# default of a line. Validation, the derived values (line total, total due, order
-# number, status label) and every write go through SalesOrdersModel. The comboboxes
-# come from the lookups. The view records differ from the database records (DATE on
-# the screen, DATETIME in the table, display-only members), so toDbOrderHeader and
-# toDbOrderLines convert to them.
+# Three views: SalesOrdersList (query-by-example search and the result list), SalesOrders
+# (the header and the editable line-item grid) and NewOrder (the customer id asked for
+# before an order is created). The controller owns the dialogs, the user flow and the
+# SELECTs that fill the screens: the order list, the header and the lines, the customer
+# name (resolved by join) and the list-price default of a line. Validation, the derived
+# values (line total, total due, order number, status label) and every write go through
+# SalesOrdersModel. The comboboxes come from the lookups. The view records differ from the
+# database records (DATE on the screen, DATETIME in the table, display-only members), so
+# toDbOrderHeader and toDbOrderLines convert to them.
 #
 # Public entry: salesOrdersRun()
 ################################################################################
@@ -23,7 +23,7 @@ IMPORT FGL SalesPersonsLookup
 IMPORT FGL SpecialOffersLookup
 IMPORT FGL TerritoriesLookup
 
-PRIVATE CONSTANT cMaxRows = 500
+PRIVATE CONSTANT cMaxRows = 1000
 
 #+ Order summary row for the list. The order number and the status label are derived
 #+ by the model after the read; the customer name is resolved by join.
@@ -150,6 +150,7 @@ END FUNCTION
 #+ Query-by-example over the order base columns. Returns FALSE if cancelled.
 #-------------------------------------------------------------------------------
 PRIVATE FUNCTION searchOrders() RETURNS BOOLEAN
+   LET int_flag = FALSE
    CONSTRUCT BY NAME orderWhere ON salesorderheader.salesorderid, salesorderheader.customerid
    RETURN (NOT int_flag)
 END FUNCTION
@@ -201,6 +202,7 @@ END FUNCTION
 #-------------------------------------------------------------------------------
 PRIVATE FUNCTION browseOrderList() RETURNS ()
    VAR newId INTEGER
+   LET int_flag = FALSE
    DISPLAY ARRAY orderList TO srOrders.* ATTRIBUTES(DOUBLECLICK = open)
 
       ON ACTION open ATTRIBUTES(TEXT = "Open", IMAGE = "fa-folder-open")
@@ -323,6 +325,7 @@ END FUNCTION
 #+ The master-detail dialog: header INPUT + editable line-item grid.
 #-------------------------------------------------------------------------------
 PRIVATE FUNCTION runOrderDialog() RETURNS ()
+   LET int_flag = FALSE
    DIALOG ATTRIBUTES(UNBUFFERED)
 
       INPUT BY NAME orderHeader.* ATTRIBUTES(WITHOUT DEFAULTS)
@@ -466,7 +469,11 @@ PRIVATE FUNCTION newOrder() RETURNS INTEGER
    VAR messageText STRING
    VAR newOrderId INTEGER
    LET customerId = NULL
-   PROMPT "Customer ID for the new order: " FOR customerId
+   OPEN WINDOW wNewOrder WITH FORM "NewOrder"
+      ATTRIBUTES(TEXT = "New order", STYLE = "dialog")
+   LET int_flag = FALSE
+   INPUT customerId FROM customerId
+   CLOSE WINDOW wNewOrder
    IF int_flag THEN
       RETURN 0
    END IF

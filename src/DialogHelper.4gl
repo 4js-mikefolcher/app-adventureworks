@@ -13,6 +13,7 @@
 #-------------------------------------------------------------------------------
 PUBLIC FUNCTION confirm(dialogTitle STRING, question STRING) RETURNS BOOLEAN
    VAR confirmed BOOLEAN = FALSE
+   LET int_flag = FALSE
    MENU dialogTitle ATTRIBUTES(STYLE = "dialog", COMMENT = question, IMAGE = "fa-question-circle")
       COMMAND "No"
          LET confirmed = FALSE

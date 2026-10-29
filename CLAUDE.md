@@ -18,10 +18,11 @@ All new and modified Genero code follows the team standards in
 
 @docs/CodingStandards.md
 
-- The standards take precedence over the style of the surrounding code. Rules 1-10
-  are fully applied to this repo: 3-space indent, camelCase names without
+- The standards take precedence over the style of the surrounding code. Rules 1-10, 14
+  and 15 are fully applied to this repo: 3-space indent, camelCase names without
   underscores, Title Case file and module names, `VAR` locals, typed signatures,
-  named `TYPE`s and `IMPORT FGL` only (no linking). Rules 11-13 (MVC separation,
+  named `TYPE`s, `IMPORT FGL` only (no linking), `int_flag` reset before every dialog, no
+  `PROMPT`. Rules 11-13 (MVC separation,
   no cross-referencing, JSON bridge) are being applied **one feature at a time**.
   Applied everywhere: all five features, `Territories`, `SpecialOffers`, `SalesPersons`,
   `Customers` and `SalesOrders` (each a `<Feature>Model`, `<Feature>Controller` and
@@ -81,7 +82,7 @@ All new and modified Genero code follows the team standards in
   `statusLabel`, `orderNumber`), `validateOrderLines`, the reads that serve a write
   (`resolveOffer`, `customerExists`, the address and ship-method defaults inside `createOrder`)
   and `saveOrder` (header update plus delete-all/insert-all lines in one transaction).
-  `SalesOrdersController.4gl` serves two views (`SalesOrdersList.per`, `SalesOrders.per`),
+  `SalesOrdersController.4gl` serves three views (`SalesOrdersList.per`, `SalesOrders.per`, `NewOrder.per`),
   resolves the customer name by join (no per-row query), reads the list-price default itself,
   and fills the comboboxes from `SalesPersonsLookup`, `TerritoriesLookup`, `ProductsLookup`
   and `SpecialOffersLookup` (plus the model-labelled status list).

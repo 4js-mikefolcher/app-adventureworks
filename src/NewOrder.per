@@ -1,0 +1,13 @@
+LAYOUT (TEXT = "New order")
+  VBOX
+    GRID
+    {
+      Customer ID: [fCustomerId   ]
+    }
+    END
+  END
+END
+
+ATTRIBUTES
+  EDIT fCustomerId = FORMONLY.customerId TYPE INTEGER;
+END
