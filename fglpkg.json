@@ -7,7 +7,7 @@
   "dependencies": {},
   "devDependencies": {
     "fgl": {
-      "fglunit": "^0.2.0"
+      "fglunit": "^1.0.0"
     }
   }
 }

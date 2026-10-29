@@ -1,0 +1,51 @@
+{
+  "lockfileVersion": 1,
+  "generatedAt": "2026-10-29T19:44:33Z",
+  "generoVersion": "6.00.01",
+  "root": {
+    "name": "app-adventureworks",
+    "version": "0.1.0",
+    "declared": {
+      "dependencies": {},
+      "devDependencies": {
+        "fgl": {
+          "fglunit": "^1.0.0"
+        }
+      },
+      "optionalDependencies": {}
+    }
+  },
+  "packages": [
+    {
+      "name": "fglunit",
+      "version": "1.0.1",
+      "downloadUrl": "https://service.generointelligence.ai/registry/packages/fglunit/versions/1.0.1/artifacts/genero6",
+      "checksum": "8d868ce0fcfb7e8e420f66855e004c5d7b023074e7a482ab479aa8bc62fc5640",
+      "generoMajor": "6",
+      "requiredBy": [
+        "<root>"
+      ],
+      "scope": "dev",
+      "generoPackages": [
+        "com.fourjs.fglunit"
+      ],
+      "materialized": [
+        "com/fourjs/fglunit/Aggregator.42m",
+        "com/fourjs/fglunit/Assertions.42m",
+        "com/fourjs/fglunit/CliArgs.42m",
+        "com/fourjs/fglunit/Discovery.42m",
+        "com/fourjs/fglunit/FglUnit.42m",
+        "com/fourjs/fglunit/Internal.42m",
+        "com/fourjs/fglunit/Reporter.42m",
+        "com/fourjs/fglunit/fglunit_gen.42m",
+        "com/fourjs/fglunit/fglunit_run.42m"
+      ],
+      "size": 34889,
+      "uploadedAt": "2026-09-29T15:15:18.921Z",
+      "uploader": "partner:a69745237238d6e6977664fb536b37e3",
+      "signature": "R3a8lb+moGZxx+UvYkQF0LVrmCBhLubg6QmCfnaAcJZNH8CcB6kphicc9wJ/X1ZQ3X5/U3FRSIxUPf5wVTunBA==",
+      "signatureKeyid": "prod-key-1"
+    }
+  ],
+  "jars": []
+}
