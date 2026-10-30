@@ -103,7 +103,7 @@ All new and modified Genero code follows the team standards in
   (`resolveOffer`, `customerExists`, the address and ship-method defaults inside `createOrder`)
   and `saveOrder` (header update plus delete-all/insert-all lines in one transaction).
   `SalesOrdersController.4gl` serves three views (`SalesOrdersList.per`, `SalesOrders.per`, `NewOrder.per`),
-  resolves the customer name by join (no per-row query), reads the list-price default itself,
+  looks up the customer name itself (`customerLabel`), reads the list-price default itself,
   and fills the comboboxes from `SalesPersonsLookup`, `TerritoriesLookup`, `ProductsLookup`
   and `SpecialOffersLookup` (plus the model-labelled status list).
 - Testable logic is the models' PUBLIC functions and the controllers' PUBLIC conversion

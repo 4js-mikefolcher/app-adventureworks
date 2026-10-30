@@ -6,11 +6,11 @@
 # (the header and the editable line-item grid) and NewOrder (the customer id asked for
 # before an order is created). The controller owns the dialogs, the user flow and the
 # SELECTs that fill the screens: the order list, the header and the lines, the customer
-# name (resolved by join) and the list-price default of a line. Validation, the derived
-# values (line total, total due, order number, status label) and every write go through
-# SalesOrdersModel. The comboboxes come from the lookups. The view records differ from the
-# database records (DATE on the screen, DATETIME in the table, display-only members), so
-# toDbOrderHeader and toDbOrderLines convert to them.
+# name and the list-price default of a line. Validation, the derived values (line total,
+# total due, order number, status label) and every write go through SalesOrdersModel.
+# The comboboxes come from the lookups. The view records differ from the database records
+# (DATE on the screen, DATETIME in the table, display-only members), so toDbOrderHeader
+# and toDbOrderLines convert to them.
 #
 # Public entry: salesOrdersRun()
 ################################################################################
@@ -26,7 +26,7 @@ IMPORT FGL TerritoriesLookup
 PRIVATE CONSTANT cMaxRows = 1000
 
 #+ Order summary row for the list. The order number and the status label are derived
-#+ by the model after the read; the customer name is resolved by join.
+#+ by the model after the read; the customer name comes from customerLabel.
 PRIVATE TYPE tOrderRow RECORD
    salesOrderId  INTEGER,
    orderNumber   VARCHAR(25),
@@ -156,10 +156,9 @@ PRIVATE FUNCTION searchOrders() RETURNS BOOLEAN
 END FUNCTION
 
 #-------------------------------------------------------------------------------
-#+ Run the search, loading up to cMaxRows order summaries. The customer name is
-#+ resolved by join in the same SELECT; the order number and the status label are
-#+ derived by the model after each read. The SQL is dynamic because the WHERE clause
-#+ comes from the CONSTRUCT.
+#+ Run the search, loading up to cMaxRows order summaries. The customer name comes
+#+ from customerLabel; the order number and the status label are derived by the model
+#+ after each read. The SQL is dynamic because the WHERE clause comes from the CONSTRUCT.
 #-------------------------------------------------------------------------------
 PRIVATE FUNCTION loadOrderList() RETURNS ()
    VAR rec tOrderRow
@@ -169,24 +168,17 @@ PRIVATE FUNCTION loadOrderList() RETURNS ()
    LET sqlText =
       "SELECT salesorderheader.salesorderid, salesorderheader.orderdate,"
       || " salesorderheader.status, salesorderheader.customerid,"
-      || " CASE WHEN store.name IS NOT NULL THEN store.name"
-      || "      ELSE TRIM(person.lastname) || ', ' || TRIM(person.firstname) END,"
       || " (salesorderheader.subtotal + salesorderheader.taxamt + salesorderheader.freight)"
       || " FROM salesorderheader"
-      || " LEFT JOIN customer ON customer.customerid = salesorderheader.customerid"
-      || " LEFT JOIN person ON person.businessentityid = customer.personid"
-      || " LEFT JOIN store  ON store.businessentityid  = customer.storeid"
       || " WHERE " || orderWhere
       || " ORDER BY salesorderheader.salesorderid DESC"
    CALL orderList.clear()
    DECLARE cursOrders CURSOR FROM sqlText
    FOREACH cursOrders INTO rec.salesOrderId, rec.orderDate, statusCode, customerId,
-         rec.customerName, rec.totalDue
+         rec.totalDue
       LET rec.orderNumber = SalesOrdersModel.orderNumber(rec.salesOrderId)
       LET rec.statusLabel = SalesOrdersModel.statusLabel(statusCode)
-      IF rec.customerName IS NULL THEN
-         LET rec.customerName = SFMT("Customer %1", customerId)
-      END IF
+      LET rec.customerName = customerLabel(customerId)
       LET orderList[orderList.getLength() + 1] = rec
       IF orderList.getLength() >= cMaxRows THEN
          EXIT FOREACH
@@ -195,6 +187,25 @@ PRIVATE FUNCTION loadOrderList() RETURNS ()
    IF orderList.getLength() >= cMaxRows THEN
       MESSAGE SFMT("Showing the first %1 matches - refine the search to narrow the list.", cMaxRows)
    END IF
+END FUNCTION
+
+#-------------------------------------------------------------------------------
+#+ The display name of a customer: the store name, else "last, first" of the person,
+#+ else "Customer <id>".
+#-------------------------------------------------------------------------------
+PRIVATE FUNCTION customerLabel(customerId INTEGER) RETURNS STRING
+   VAR customerText STRING
+   SELECT CASE WHEN store.name IS NOT NULL THEN store.name
+         ELSE TRIM(person.lastname) || ', ' || TRIM(person.firstname) END
+      INTO customerText
+      FROM customer
+      LEFT JOIN person ON person.businessentityid = customer.personid
+      LEFT JOIN store ON store.businessentityid = customer.storeid
+      WHERE customer.customerid = customerId
+   IF customerText IS NULL THEN
+      LET customerText = SFMT("Customer %1", customerId)
+   END IF
+   RETURN customerText
 END FUNCTION
 
 #-------------------------------------------------------------------------------
