@@ -12,6 +12,26 @@ what is specific to this project.
 This is **AdventureWorks Sales** — a front-end app over the Sales domain of the
 AdventureWorks PostgreSQL database. See `README.md` for the full overview.
 
+### Git workflow
+- Never change tracked files on `main`, whether code or documentation. Before changing anything,
+  create a local work branch from an up-to-date `main` and work there. Create it without asking,
+  unless there are pending changes to resolve first (see below).
+- Branch names are kebab-case (lowercase words joined by hyphens), with one of these prefixes:
+  - `feature/<name>` when adding a new feature
+  - `fix/<name>` for a bug fix
+  - `test/<name>` when the only changes are tests
+  - `docs/<name>` when the only changes are documentation
+  - `release/<version>` when staging a release
+- Feature and fix branches should include tests for everything they add or change.
+- Commit only when the user asks. If the user asks for a change that is unrelated to the work on the
+  current branch (use your judgment), ask whether to commit the current work and start a new branch
+  for the new change.
+- Before switching to or creating another branch, check for pending changes (`git status`). If there
+  are any, ask the user how to resolve them (commit, stash or discard) and resolve them first. Never
+  carry them to another branch silently.
+- The branch stays local: Claude does not push. The developer pushes the local branch to the
+  remote manually.
+
 ### Coding Standards
 All new and modified Genero code follows the team standards in
 `docs/CodingStandards.md`, imported here so they load every session:
