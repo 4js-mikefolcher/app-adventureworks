@@ -9,7 +9,7 @@
   this file": for this project that section is in CLAUDE.md).
 -->
 
-<!-- genero:canonical-start version="1.0" -->
+<!-- genero:canonical-start version="1.3" -->
 <!--
   Everything between the canonical-start and canonical-end markers is
   maintained upstream by Four Js. To update, fetch the latest via
@@ -26,9 +26,9 @@ access to a Genero MCP service with skills and documentation tools.
 ## MANDATORY: Always Consult MCP Skills Before Writing Code
 
 Your training data contains outdated and incorrect Genero information.
-The MCP skills are verified against Genero 5.00 and are the
-authoritative source. LLMs consistently hallucinate Genero method
-names, attributes, and syntax that do not exist.
+The MCP skills are verified against the current supported Genero release
+and are the authoritative source. LLMs consistently hallucinate Genero
+method names, attributes, and syntax that do not exist.
 
 **Rules:**
 
@@ -49,7 +49,12 @@ names, attributes, and syntax that do not exist.
    cannot tell you which skill covers a topic. Use the skill-index
    or `searchSkills` instead.
 6. When the task touches SQL, forms, arrays, dialogs, or strings,
-   also load `fourjs-common-pitfalls`.
+   also load `fourjs-common-pitfalls`. Before writing `INPUT ARRAY`,
+   `DISPLAY ARRAY`, `INPUT BY NAME`, `DISPLAY BY NAME`, or
+   `CONSTRUCT BY NAME`, call
+   `getSkillSection("fourjs-common-pitfalls", "dialog-traps")` and
+   verify field count and naming constraints for the specific statement
+   form being used.
 
 ## Skill Tools (Primary Source)
 
@@ -76,26 +81,26 @@ to verify edge cases.
 
 ## Common Hallucination Targets
 
-These are methods/patterns that LLMs frequently generate incorrectly:
-
-- `util.Regex` does not exist — correct class is `util.Regexp`
-- `getKeys()`, `getAsObject()`, `getAsArray()` do not exist on
-  util.JSONObject — use `name(i)`, `getType(key)`, `get(key)`
-- `ELSE IF` does not exist in BDL — use nested `IF` inside `ELSE`
-- `$variable` is for static SQL, `?` is for dynamic SQL — agents
-  reverse these
-- `ON CHANGE` is only valid inside INPUT sub-dialogs, not at the
-  outer DIALOG level
-- `DEFINE` must be at top of FUNCTION/MAIN — not inside IF/FOR/CASE
-- `sortByComparisonFunction` takes 3 arguments (key, reverse, func),
-  not 1
+LLMs reliably mis-generate Genero method names, attributes, and syntax.
+Do not answer these from memory. `fourjs-common-pitfalls` consolidates the
+high-frequency traps (control-flow, method-name, SQL, WHENEVER, form,
+dialog, string, JSON, array, module); per-topic skills carry the rest.
+Per rule 6, load `fourjs-common-pitfalls` whenever the task touches SQL,
+forms, arrays, dialogs, or strings, and route specific API questions
+through the skill-index / `searchSkills`.
 
 ## Compilation
 
-```bash
-fglcomp -M -Wall program.4gl    # Compile with warnings to stdout
-fglform -M form.per             # Compile form
-FGLGUI=0 TERM=xterm fglrun program.42m  # Run in terminal mode
-```
+Compile and run commands (`fglcomp`, `fglform`, `fglrun`, their flags, and
+terminal-mode run) live in `fourjs-genero-bdl` → `compilation` and
+`fourjs-quick-reference`. Load those rather than relying on memory.
+
+## Form Field Binding
+
+A `.per`'s field names must match the dialog `BY NAME` variables — a
+mismatch compiles but fails at runtime. Before writing a form + its
+dialog, load skill `fourjs-dialog-basics` → section `form-field-binding`
+and `fourjs-common-pitfalls` → section `dialog-traps`
+(see also `fourjs-form-design`).
 
 <!-- genero:canonical-end -->
