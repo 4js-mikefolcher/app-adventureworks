@@ -22,7 +22,7 @@ AdventureWorks PostgreSQL database. See `README.md` for the full overview.
   - `test/<name>` when the only changes are tests
   - `docs/<name>` when the only changes are documentation
   - `release/<version>` when staging a release
-- Feature and fix branches should include tests for everything they add or change.
+- Feature and fix branches do not get new tests unless the user asks for them (see Testing).
 - Commit only when the user asks. If the user asks for a change that is unrelated to the work on the
   current branch (use your judgment), ask whether to commit the current work and start a new branch
   for the new change.
@@ -110,6 +110,11 @@ All new and modified Genero code follows the team standards in
   functions. Put new pure or write-serving logic in the model, not in PRIVATE dialog functions.
 
 ### Testing (fglunit)
+- **Do not create unit tests (fglunit) or functional tests (GGC, fgltest) unless the user's prompt
+  explicitly asks for them.** Writing and running them takes time, so a request to add or change a
+  feature, fix a bug or refactor does not include tests, even though the code is testable and even
+  though the standards (rule 13) and the Git workflow would otherwise call for them. This rule
+  overrides those; do not add tests "to be safe". The notes below apply when tests are requested.
 - Suites are in `tests/`; run with `make test` (writes `bin/junit-*.xml`).
 - A test program is a `.4gl` with a `MAIN` that does:
   `CALL CliArgs.parse()` (enables `--junit`/`--filter`/`-v`/`--fail-fast`),
@@ -117,9 +122,9 @@ All new and modified Genero code follows the team standards in
   test, then `EXIT PROGRAM FglUnit.run()`. Tests are PUBLIC, parameterless.
 - fglunit can only call PUBLIC functions of an imported module — PRIVATE
   functions are untestable from outside (another reason to keep logic in the models).
-- Every conversion function has a suite (rule 13): each `Test<Feature>` populates every
-  member that crosses the JSON bridge and asserts none came back NULL (not-NULL first, then
-  the value: `assertTrue(NULL)` does not fail).
+- When tests are requested, every conversion function has a suite (rule 13): each
+  `Test<Feature>` populates every member that crosses the JSON bridge and asserts none came
+  back NULL (not-NULL first, then the value: `assertTrue(NULL)` does not fail).
 - Resolve the fglunit package on the path with `eval "$(fglpkg env)"`, then
   prepend `bin/` (the app's compiled libraries) to `FGLLDPATH`.
 - DB-backed suites connect in `setupSuite` with TRY/CATCH and `skip()` every
